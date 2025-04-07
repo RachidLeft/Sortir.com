@@ -60,7 +60,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Event>
      */
     #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'organizer', orphanRemoval: true)]
-    private Collection $organizer;
+    private Collection $events;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
     #[ORM\JoinColumn(nullable: false)]
@@ -69,7 +69,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->isRegister = new ArrayCollection();
-        $this->organizer = new ArrayCollection();
+        $this->events = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -236,13 +236,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getOrganizer(): Collection
     {
-        return $this->organizer;
+        return $this->events;
     }
 
     public function addOrganizer(Event $organizer): static
     {
-        if (!$this->organizer->contains($organizer)) {
-            $this->organizer->add($organizer);
+        if (!$this->events->contains($organizer)) {
+            $this->events->add($organizer);
             $organizer->setOrganizer($this);
         }
 
@@ -251,7 +251,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeOrganizer(Event $organizer): static
     {
-        if ($this->organizer->removeElement($organizer)) {
+        if ($this->events->removeElement($organizer)) {
             // set the owning side to null (unless already changed)
             if ($organizer->getOrganizer() === $this) {
                 $organizer->setOrganizer(null);
