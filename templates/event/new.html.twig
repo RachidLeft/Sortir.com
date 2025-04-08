@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle sortie{% endblock %}
+
+{% form_theme form 'bootstrap_5_layout.html.twig' %}
+
+{% block body %}
+
+        <div class="row justify-content-center">
+            <h2>Créer une nouvelle sortie</h2>
+            {{ form_start(form, {'id': 'form'}) }}
+            <div class="row justify-content-center">
+                <div class="col-4">
+                    {{ form_row(form.name) }}
+                    {{ form_row(form.startDateTime) }}
+                    {{ form_row(form.registrationDeadline) }}
+                    {{ form_row(form.maxRegistration) }}
+                    {{ form_row(form.duration) }}
+                    {{ form_row(form.info) }}
+                </div>
+                <div class="col-4">
+
+                    {{ form_row(form.location, {'id': 'location'}) }}
+
+                </div>
+            </div>
+            {{ form_end(form) }}
+            <div class="row justify-content-center">
+
+                <div class="col-1">
+                    <a href="{{ path('app_event_index') }}">
+                        <button type="button" class="btn btn-outline-info">Annuler</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+    {# <a href="{{ path('app_event_index') }}">back to list</a>#}
+{% endblock %}

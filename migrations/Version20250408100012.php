@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250407141638 extends AbstractMigration
+final class Version20250408100012 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,13 +21,10 @@ final class Version20250407141638 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            CREATE TABLE city (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(50) NOT NULL, postal_code VARCHAR(10) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
-        SQL);
-        $this->addSql(<<<'SQL'
             CREATE TABLE event (id INT AUTO_INCREMENT NOT NULL, organizer_id INT NOT NULL, location_id INT NOT NULL, site_id INT NOT NULL, status_id INT NOT NULL, name VARCHAR(255) NOT NULL, start_date_time DATETIME NOT NULL, duration INT NOT NULL, registration_deadline DATETIME NOT NULL, max_registration INT NOT NULL, info LONGTEXT DEFAULT NULL, INDEX IDX_3BAE0AA7876C4DDA (organizer_id), INDEX IDX_3BAE0AA764D218E (location_id), INDEX IDX_3BAE0AA7F6BD1646 (site_id), INDEX IDX_3BAE0AA76BF700BD (status_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE location (id INT AUTO_INCREMENT NOT NULL, city_id INT NOT NULL, name VARCHAR(255) NOT NULL, street VARCHAR(100) NOT NULL, latitude DOUBLE PRECISION DEFAULT NULL, longitude DOUBLE PRECISION DEFAULT NULL, INDEX IDX_5E9E89CB8BAC62AF (city_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+            CREATE TABLE location (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, street VARCHAR(100) NOT NULL, latitude DOUBLE PRECISION DEFAULT NULL, longitude DOUBLE PRECISION DEFAULT NULL, city_name VARCHAR(50) NOT NULL, postal_code VARCHAR(5) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE site (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(50) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
@@ -57,9 +54,6 @@ final class Version20250407141638 extends AbstractMigration
             ALTER TABLE event ADD CONSTRAINT FK_3BAE0AA76BF700BD FOREIGN KEY (status_id) REFERENCES status (id)
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE location ADD CONSTRAINT FK_5E9E89CB8BAC62AF FOREIGN KEY (city_id) REFERENCES city (id)
-        SQL);
-        $this->addSql(<<<'SQL'
             ALTER TABLE user ADD CONSTRAINT FK_8D93D6494778DD7B FOREIGN KEY (is_attached_id) REFERENCES site (id)
         SQL);
         $this->addSql(<<<'SQL'
@@ -86,9 +80,6 @@ final class Version20250407141638 extends AbstractMigration
             ALTER TABLE event DROP FOREIGN KEY FK_3BAE0AA76BF700BD
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE location DROP FOREIGN KEY FK_5E9E89CB8BAC62AF
-        SQL);
-        $this->addSql(<<<'SQL'
             ALTER TABLE user DROP FOREIGN KEY FK_8D93D6494778DD7B
         SQL);
         $this->addSql(<<<'SQL'
@@ -96,9 +87,6 @@ final class Version20250407141638 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE user_event DROP FOREIGN KEY FK_D96CF1FF71F7E88B
-        SQL);
-        $this->addSql(<<<'SQL'
-            DROP TABLE city
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE event
