@@ -4,8 +4,124 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9d1d7b237010984351acac99fadd68be",
+    "content-hash": "b055f478a606b9e3e65dc955fdb185cb",
     "packages": [
+        {
+            "name": "components/bootstrap",
+            "version": "4.6.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/components/bootstrap.git",
+                "reference": "fca56bda4c5c40cb2a163a143e8e4271a6721492"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/components/bootstrap/zipball/fca56bda4c5c40cb2a163a143e8e4271a6721492",
+                "reference": "fca56bda4c5c40cb2a163a143e8e4271a6721492",
+                "shasum": ""
+            },
+            "require": {
+                "components/jquery": ">=2"
+            },
+            "type": "component",
+            "extra": {
+                "component": {
+                    "shim": {
+                        "deps": [
+                            "jquery"
+                        ]
+                    },
+                    "files": [
+                        "js/*.js",
+                        "js/*.map",
+                        "css/*.css",
+                        "css/*.map"
+                    ],
+                    "scripts": [
+                        "js/bootstrap.js"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mark Otto",
+                    "email": "markdotto@gmail.com"
+                },
+                {
+                    "name": "Jacob Thornton",
+                    "email": "jacobthornton@gmail.com"
+                }
+            ],
+            "description": "The most popular front-end framework for developing responsive, mobile first projects on the web.",
+            "homepage": "https://getbootstrap.com",
+            "keywords": [
+                "css",
+                "framework",
+                "front-end",
+                "mobile-first",
+                "responsive",
+                "sass",
+                "web"
+            ],
+            "support": {
+                "issues": "https://github.com/components/bootstrap/issues",
+                "source": "https://github.com/components/bootstrap/tree/4.6.2"
+            },
+            "time": "2022-07-29T06:50:47+00:00"
+        },
+        {
+            "name": "components/jquery",
+            "version": "v3.7.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/components/jquery.git",
+                "reference": "8edc7785239bb8c2ad2b83302b856a1d61de60e7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/components/jquery/zipball/8edc7785239bb8c2ad2b83302b856a1d61de60e7",
+                "reference": "8edc7785239bb8c2ad2b83302b856a1d61de60e7",
+                "shasum": ""
+            },
+            "type": "component",
+            "extra": {
+                "component": {
+                    "files": [
+                        "jquery.min.js",
+                        "jquery.min.map",
+                        "jquery.slim.js",
+                        "jquery.slim.min.js",
+                        "jquery.slim.min.map"
+                    ],
+                    "scripts": [
+                        "jquery.js"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "JS Foundation and other contributors"
+                }
+            ],
+            "description": "jQuery JavaScript Library",
+            "homepage": "http://jquery.com",
+            "support": {
+                "forum": "http://forum.jquery.com",
+                "irc": "irc://irc.freenode.org/jquery",
+                "issues": "https://github.com/jquery/jquery/issues",
+                "source": "https://github.com/jquery/jquery",
+                "wiki": "http://docs.jquery.com/"
+            },
+            "time": "2023-09-22T01:43:46+00:00"
+        },
         {
             "name": "composer/semver",
             "version": "3.4.3",
