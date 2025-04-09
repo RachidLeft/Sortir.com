@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
@@ -17,21 +18,43 @@ class Event
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Ce champ est obligatoire') ]
+    #[Assert\Length(
+        min: 2,
+        max: 50,
+        minMessage: 'Le nom de l\'événement doit contenir au moins {{ limit }} caractères',
+        maxMessage: 'Le nom de l\'événement ne peut pas dépasser {{ limit }} caractères'
+    )]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Assert\NotBlank(message: "La date de début est obligatoire")]
+    #[Assert\GreaterThan(value: "now", message: 'La date de début doit être supérieure à la date actuelle')]
     private ?\DateTimeInterface $startDateTime = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: "La durée est obligatoire.")]
+    #[Assert\GreaterThan(0, message: 'La durée doit être supérieure à 0')]
     private ?int $duration = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotBlank(message: "La date de fin est obligatoire.")]
+    #[Assert\GreaterThan(propertyPath:'startDateTime', message: 'La date de fin doit être supérieure à la date de début')]
     private ?\DateTimeInterface $registrationDeadline = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: "Le nombre maximum de participants est obligatoire.")]
+    #[Assert\GreaterThan(0, message: 'Le nombre maximum de participants doit être supérieur à 0')]
     private ?int $maxRegistration = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\NotBlank(message: "La descritpion est obligatoire.")]
+    #[Assert\Length(
+        min: 10,
+        max: 100,
+        minMessage: 'La description doit contenir au moins {{ limit }} caractères',
+        maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères'
+    )]
     private ?string $info = null;
 
     /**
@@ -44,7 +67,7 @@ class Event
     #[ORM\JoinColumn(nullable: false)]
     private ?User $organizer = null;
 
-    #[ORM\ManyToOne(inversedBy: 'eventLocation')]
+    #[ORM\ManyToOne(inversedBy: 'eventLocation', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Location $location = null;
 
