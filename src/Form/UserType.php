@@ -9,27 +9,43 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class UserType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('email')
-            ->add('lastname')
-            ->add('firstname')
-            ->add('phone')
-            // ->add('active')
-            ->add('username')
-//             ->add('isRegister', EntityType::class, [
-//                 'class' => Event::class,
-// 'choice_label' => 'id',
-// 'multiple' => true,
-//             ])
-//             ->add('isAttached', EntityType::class, [
-//                 'class' => Site::class,
-// 'choice_label' => 'id',
-//             ])
+            ->add('username', null, [
+                'label' => 'Pseudo'
+            ])
+            ->add('firstname', null, [
+                'label' => 'Prénom'
+            ])
+            ->add('lastname', null, [
+                'label' => 'Nom'
+            ])
+            ->add('password', null, [
+                'label' => 'Mot de passe',
+                'attr' => ['autocomplete' => 'new-password'],
+            ])
+            ->add('phone', null, [
+                'label' => 'Téléphone'
+            ])
+            ->add('email', null, [
+                'label' => 'Email'
+            ])
+            ->add('picture', FileType::class, [
+                'label' => 'Ma photo',
+                'mapped' => false,
+                'required' => false,
+                ]
+            )
+            ->add('isAttached', EntityType::class, [
+                'class' => Site::class,
+                'label' => 'Site de rattachement',
+                'choice_label' => 'id',
+            ])
         ;
     }
 
