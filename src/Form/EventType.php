@@ -74,11 +74,17 @@ class EventType extends AbstractType
                 ],
 
             ])
-            ->add('save', SubmitType::class, [
-                'label' => 'Enregistrer',
-                'attr' => ['class' => 'btn btn-success'],
-            ])
         ;
+        $builder ->add('save', SubmitType::class, [
+            'label' => 'Enregistrer',
+            'attr' => ['class' => 'btn btn-primary',],
+        ])
+            ->add('submit', SubmitType::class, [
+            'label' => 'Publier',
+            'attr' => [
+                'class' => 'btn btn-primary',
+            ],
+        ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

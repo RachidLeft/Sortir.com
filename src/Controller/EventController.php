@@ -37,7 +37,7 @@ final class EventController extends AbstractController
 
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $userRepository->find(1); // Assuming you want to set the organizer to the user with ID 1
+            $user = $userRepository->find(1);
             $event->setOrganizer($user);
             $site = $siteRepository->find(1);
             $event->setSite($site);
