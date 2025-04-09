@@ -6,8 +6,9 @@
 
 {% block body %}
 
+    <div class="container mt-5 mb-5 p-5">
         <div class="row justify-content-center">
-            <h2>Créer une nouvelle sortie</h2>
+            <h2 class="text-center">Créer une sortie</h2>
             {{ form_start(form, {'id': 'form'}) }}
             <div class="row justify-content-center">
                 <div class="col-4">
@@ -19,22 +20,22 @@
                     {{ form_row(form.info) }}
                 </div>
                 <div class="col-4">
-
                     {{ form_row(form.location, {'id': 'location'}) }}
-
+                    {{ form_row(form.newLocation) }}
                 </div>
             </div>
-
-            {{ form_end(form) }}
             <div class="row justify-content-center">
-
-                <div class="col-1">
+                <div class="col-auto me-3">{{ form_row(form.publier, { 'attr': {'class': 'btn btn-outline-info'}}) }}</div>
+                <div class="col-auto me-3">{{ form_row(form.enregistrer, { 'attr': {'class': 'btn btn-outline-info'}}) }}</div>
+                {{ form_end(form) }}
+                <div class="col-auto">
                     <a href="{{ path('app_event_index') }}">
                         <button type="button" class="btn btn-outline-info">Annuler</button>
                     </a>
                 </div>
             </div>
         </div>
+    </div>
 
 
     {# <a href="{{ path('app_event_index') }}">back to list</a>#}

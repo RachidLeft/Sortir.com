@@ -8,10 +8,6 @@
     <table class="table">
         <tbody>
             <tr>
-                <th>Id</th>
-                <td>{{ event.id }}</td>
-            </tr>
-            <tr>
                 <th>Name</th>
                 <td>{{ event.name }}</td>
             </tr>
@@ -35,6 +31,9 @@
                 <th>Info</th>
                 <td>{{ event.info }}</td>
             </tr>
+            <tr>
+                <th>Location</th>
+                <td><p>Lieu : {{ location.name }} - {{ location.street }}, {{ location.postalCode }} {{ location.cityName }}</p></td>
         </tbody>
     </table>
 

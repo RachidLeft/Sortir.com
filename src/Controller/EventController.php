@@ -37,11 +37,25 @@ final class EventController extends AbstractController
 
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $newLocationData = $form->get('newLocation')->getData();
+
+            if ($newLocationData){
+                $entityManager->persist($newLocationData);
+                $entityManager->flush();
+                $event->setLocation($newLocationData);
+            }
+
             $user = $userRepository->find(1);
             $event->setOrganizer($user);
             $site = $siteRepository->find(1);
             $event->setSite($site);
-            $status = $statusRepository->find(1);
+
+            if ($form->get('publier')->isClicked()) {
+                $status = $statusRepository->findOneBy(['type' => 'Ouverte']);
+            } else {
+                $status = $statusRepository->findOneBy(['type' => 'En création']);
+            }
+
             $event->setStatus($status);
             $entityManager->persist($event);
             $entityManager->flush();
@@ -61,6 +75,7 @@ final class EventController extends AbstractController
     {
         return $this->render('event/show.html.twig', [
             'event' => $event,
+            'location' => $event->getLocation(),
         ]);
     }
 
@@ -92,4 +107,6 @@ final class EventController extends AbstractController
 
         return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
     }
+
+
 }

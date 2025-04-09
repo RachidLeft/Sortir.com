@@ -69,21 +69,19 @@ class EventType extends AbstractType
                     return $er->createQueryBuilder('l')
                         ->orderBy('l.name', 'ASC');
                 },
-               'attr' => [
-                    'class' => 'location-select',
-                ],
-
+               'required'=> false,
+            ])
+            ->add('newLocation', LocationType::class, [
+                'label' => 'Ajouter un nouveau lieu',
+                'required' => false,
+                'mapped' => false, // Ce champ n'est pas directement lié à l'entité Event
             ])
         ;
-        $builder ->add('save', SubmitType::class, [
+        $builder ->add('enregistrer', SubmitType::class, [
             'label' => 'Enregistrer',
-            'attr' => ['class' => 'btn btn-primary',],
         ])
-            ->add('submit', SubmitType::class, [
+            ->add('publier', SubmitType::class, [
             'label' => 'Publier',
-            'attr' => [
-                'class' => 'btn btn-primary',
-            ],
         ]);
     }
 
