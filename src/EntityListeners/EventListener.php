@@ -28,6 +28,6 @@ class EventListener
             ($event->getRegistrationDeadline() < $now && $now < $event->getStartDateTime())) {
             $event->setStatus($statusRepo->findOneBy(['type' => 'Cloturée']));
         }
-
+        //TODO gérer le statu Archivée
     }
 }

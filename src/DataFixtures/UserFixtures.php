@@ -9,6 +9,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixtures extends Fixture
 {
+    private const EMAIL_DOMAIN = 'campus-eni.fr';
+
     public function __construct(
         private UserPasswordHasherInterface $passwordHasher
     ) {}
@@ -18,7 +20,8 @@ class UserFixtures extends Fixture
         for ($i = 1; $i <= 10; $i++) {
             $user = new User();
 
-            $email = sprintf('user%d@example.com', $i);
+            // Assurer que l'email appartient toujours au domaine campus-eni.fr
+            $email = sprintf('user%d@%s', $i, self::EMAIL_DOMAIN);
             $user->setEmail($email);
 
             $hashedPassword = $this->passwordHasher->hashPassword($user, 'password');
@@ -32,6 +35,19 @@ class UserFixtures extends Fixture
 
             $manager->persist($user);
         }
+
+        // Création d'un utilisateur administrateur
+        $admin = new User();
+        $admin->setEmail(sprintf('admin@%s', self::EMAIL_DOMAIN));
+        $admin->setPassword($this->passwordHasher->hashPassword($admin, 'admin'));
+        $admin->setUsername('admin');
+        $admin->setFirstname('Admin');
+        $admin->setLastname('Admin');
+        $admin->setPhone('0987654321');
+        $admin->setActive(true);
+        $admin->setRoles(['ROLE_ADMIN']);
+
+        $manager->persist($admin);
 
         $manager->flush();
     }

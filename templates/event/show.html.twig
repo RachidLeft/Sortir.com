@@ -3,43 +3,62 @@
 {% block title %}Event{% endblock %}
 
 {% block body %}
-    <h1>Event</h1>
+    <h1>Détail de la sortie</h1>
 
     <table class="table">
         <tbody>
             <tr>
-                <th>Name</th>
+                <th>Nom de la sortie :</th>
                 <td>{{ event.name }}</td>
             </tr>
             <tr>
-                <th>StartDateTime</th>
-                <td>{{ event.startDateTime ? event.startDateTime|date('Y-m-d H:i:s') : '' }}</td>
+                <th>Date et heure de la sortie :</th>
+                <td>{{ event.startDateTime ? event.startDateTime|date('d-m-Y H:i:s') : '' }}</td>
             </tr>
             <tr>
-                <th>Duration</th>
-                <td>{{ event.duration }}</td>
+                <th>Date limite d'inscription :</th>
+                <td>{{ event.registrationDeadline ? event.registrationDeadline|date('d-m-Y') : '' }}</td>
             </tr>
             <tr>
-                <th>RegistrationDeadline</th>
-                <td>{{ event.registrationDeadline ? event.registrationDeadline|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>MaxRegistration</th>
+                <th>Nombre de places</th>
                 <td>{{ event.maxRegistration }}</td>
             </tr>
             <tr>
-                <th>Info</th>
+                <th>Durée :</th>
+                <td>{{ event.duration }} minutes</td>
+            </tr>
+            <tr>
+                <th>Info :</th>
                 <td>{{ event.info }}</td>
+            </tr>
+            <tr>
+                <th>Ville organisatrise :</th>
+                <td>{{ event.organizer.isAttached.name }}</td>
             </tr>
             <tr>
                 <th>Location</th>
                 <td><p>Lieu : {{ location.name }} - {{ location.street }}, {{ location.postalCode }} {{ location.cityName }}</p></td>
         </tbody>
     </table>
+    <h2>Liste des inscrits</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Pseudo</th>
+                <th>Nom</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user in event.users %}
+            <tr>
+                <td><a href="{{ path('app_user_show', {'id': user.id}) }}">{{ user.username }}</a></td>
+                <td>{{ user.firstName }} {{ user.lastname }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
 
     <a href="{{ path('app_event_index') }}">back to list</a>
-
-    <a href="{{ path('app_event_edit', {'id': event.id}) }}">Modifier</a>
-
-    {{ include('event/_delete_form.html.twig') }}
+{#{{ include('event/_delete_form.html.twig') }}#}
 {% endblock %}

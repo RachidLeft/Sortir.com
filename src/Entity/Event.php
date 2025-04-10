@@ -65,8 +65,8 @@ class Event
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'isRegister')]
     private Collection $users;
 
-    #[ORM\ManyToOne(inversedBy: 'organizer')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(inversedBy: 'events')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $organizer = null;
 
     #[ORM\ManyToOne(inversedBy: 'eventLocation', cascade: ['persist'])]

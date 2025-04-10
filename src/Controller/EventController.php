@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/event')]
 final class EventController extends AbstractController
@@ -26,9 +27,10 @@ final class EventController extends AbstractController
     }
 
     #[Route('/new', name: 'app_event_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager,
-                        UserRepository $userRepository,
-                        SiteRepository $siteRepository,
+    #[IsGranted('ROLE_USER')]
+    public function new(Request          $request, EntityManagerInterface $entityManager,
+                        UserRepository   $userRepository,
+                        SiteRepository   $siteRepository,
                         StatusRepository $statusRepository): Response
     {
         $event = new Event();
@@ -39,15 +41,15 @@ final class EventController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $newLocationData = $form->get('newLocation')->getData();
 
-            if ($newLocationData){
+            if ($newLocationData) {
                 $entityManager->persist($newLocationData);
                 $entityManager->flush();
                 $event->setLocation($newLocationData);
             }
 
-            $user = $userRepository->find(1);
-            $event->setOrganizer($user);
-            $site = $siteRepository->find(1);
+            $currentUser = $this->getUser();
+            $event->setOrganizer($currentUser);
+            $site = $currentUser->getIsAttached();
             $event->setSite($site);
 
             if ($form->get('publier')->isClicked()) {
@@ -100,7 +102,7 @@ final class EventController extends AbstractController
     #[Route('/{id}', name: 'app_event_delete', methods: ['POST'])]
     public function delete(Request $request, Event $event, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$event->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $event->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($event);
             $entityManager->flush();
         }
@@ -109,5 +111,61 @@ final class EventController extends AbstractController
     }
 
 
+    #[Route('/{id}/register', name: 'app_event_register', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function inscription(Request $request, Event $event, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('register' . $event->getId(), $request->getPayload()->getString('_token'))) {
+
+            $user = $this->getUser();
+
+            // Vérifier si la sortie est ouverte et si la date limite d'inscription n'est pas dépassée
+            if ($event->getStatus()->getType() !== 'Ouverte' || $event->getRegistrationDeadline() <= new \DateTime()) {
+                $this->addFlash('danger', 'Vous ne pouvez pas vous inscrire à cette sortie.');
+                return $this->redirectToRoute('app_event_index');
+            }
+
+            // Vérifier que l'utilisateur n'est pas déjà inscrit
+            if ($event->getUsers()->contains($user)) {
+                $this->addFlash('danger', 'Vous êtes déjà inscrit à cette sortie.');
+                return $this->redirectToRoute('app_event_index');
+            } else {
+                $event->addUser($user);
+                $entityManager->flush();
+                $this->addFlash('success', 'Vous êtes maintenant inscrit à la sortie.');
+            }
+
+        }
+
+        return $this->redirectToRoute('app_event_show', ['id' => $event->getId()]);
+
+    }
+
+    #[Route('/{id}/unregister', name: 'app_event_unregister', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function unregister(Request $request, Event $event, EntityManagerInterface $entityManager): Response
+    {
+
+        if ($this->isCsrfTokenValid('unregister' . $event->getId(), $request->getPayload()->getString('_token'))) {
+            $user = $this->getUser();
+
+           /* // Vérifier que la sortie n'a pas débuté
+            if ($event->getStartDateTime() <= new \DateTime()) {
+                $this->addFlash('danger', 'Vous ne pouvez pas vous désinscrire d\'une sortie qui a déjà commencé.');
+                return $this->redirectToRoute('app_event_show', ['id' => $event->getId()]);
+            }*/
+
+            // Vérifier que l'utilisateur est bien inscrit à la sortie
+            if (!$event->getUsers()->contains($user)) {
+                $this->addFlash('danger', 'Vous n\'êtes pas inscrit à cette sortie.');
+            } else {
+                $event->removeUser($user);
+                $entityManager->flush();
+                $this->addFlash('success', 'Votre désinscription a été prise en compte.');
+            }
+        }
+
+        return $this->redirectToRoute('app_event_index');
+    }
 
 }

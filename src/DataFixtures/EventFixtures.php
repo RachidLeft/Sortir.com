@@ -17,48 +17,75 @@ class EventFixtures extends Fixture
     {
         $faker = Factory::create('fr_FR');
 
-        // Exemple d'entités liées
-        $organizer = new User();
-        $organizer->setEmail('organizer@example.com')
-            ->setUsername($faker->userName)
-            ->setFirstName($faker->firstName)
-            ->setLastName($faker->lastName)
-            ->setPhone($faker->phoneNumber)
-            ->setActive(true)
-            ->setPassword('password')
-            ->setRoles(['ROLE_USER']);
-        $manager->persist($organizer);
+        // Création de plusieurs utilisateurs
+        $users = [];
+        for ($i = 0; $i < 5; $i++) {
+            $user = new User();
+            $user->setEmail($faker->email)
+                ->setUsername($faker->userName)
+                ->setFirstName($faker->firstName)
+                ->setLastName($faker->lastName)
+                ->setPhone($faker->phoneNumber)
+                ->setActive(true)
+                ->setPassword('password') // Remplacez par un hash si nécessaire
+                ->setRoles(['ROLE_USER']);
+            $manager->persist($user);
+            $users[] = $user;
+        }
 
-        $location = new Location();
-        $location->setLatitude($faker->latitude)
-            ->setLongitude($faker->longitude)
-            ->setStreet($faker->address);
-        $manager->persist($location);
+        // Création de plusieurs lieux
+        $locations = [];
+        for ($i = 0; $i < 5; $i++) {
+            $location = new Location();
+            $location->setName($faker->company)
+                ->setLatitude($faker->latitude)
+                ->setLongitude($faker->longitude)
+                ->setStreet($faker->address)
+                ->setPostalCode($faker->postcode)
+                ->setCityName($faker->city);
+            $manager->persist($location);
+            $locations[] = $location;
+        }
 
-        $site = new Site();
-        $site->setName('Site Example');
-        $manager->persist($site);
+        // Création de plusieurs sites
+        $sites = [];
+        for ($i = 0; $i < 5; $i++) {
+            $site = new Site();
+            $site->setName($faker->company);
+            $manager->persist($site);
+            $sites[] = $site;
+        }
 
-        $status = new Status();
-        $status->setType('Ouvert');
-        $manager->persist($status);
+        // Création de plusieurs statuts
+        $statuses = [];
+        $statusTypes = ['Ouverte', 'Clôturée', 'Archivée', 'En cours', 'Passée', 'En création', 'Annulée'];
+        foreach ($statusTypes as $type) {
+            $status = new Status();
+            $status->setType($type);
+            $manager->persist($status);
+            $statuses[] = $status;
+        }
 
         // Création des événements
         for ($i = 0; $i < 10; $i++) {
             $event = new Event();
+            $startDateTime = $faker->dateTimeBetween('+3 days', '+1 month');
+            $registrationDeadline = (clone $startDateTime)->modify('-2 days');
+
             $event->setName($faker->sentence(3))
-                ->setStartDateTime($faker->dateTimeBetween('+1 days', '+1 month'))
+                ->setStartDateTime($startDateTime)
                 ->setDuration($faker->numberBetween(30, 180))
-                ->setRegistrationDeadline($faker->dateTimeBetween('now', '+1 week'))
+                ->setRegistrationDeadline($registrationDeadline)
                 ->setMaxRegistration($faker->numberBetween(5, 50))
                 ->setInfo($faker->text(200))
-                ->setOrganizer($organizer)
-                ->setLocation($location)
-                ->setSite($site)
-                ->setStatus($status);
+                ->setOrganizer($faker->randomElement($users))
+                ->setLocation($faker->randomElement($locations))
+                ->setSite($faker->randomElement($sites))
+                ->setStatus($faker->randomElement($statuses));
 
             $manager->persist($event);
         }
+
         $manager->flush();
     }
 }
