@@ -1,20 +1,64 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello MainController!{% endblock %}
+{% block title %}{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+    <div class="container-fluid pt-3">
+        <div class="row justify-content-center">
+            <h2>Bienvenue {{ app.user.firstname }} {{ app.user.lastname }} !</h2>
+            {% if app.user %}
+        </div>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+        <div id="filtreAccueil">
+            {{ form_start(filtreForm) }}
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>D:/Sortir.com/sortir/src/Controller/MainController.php</code></li>
-        <li>Your template at <code>D:/Sortir.com/sortir/templates/main/index.html.twig</code></li>
-    </ul>
-</div>
+            <div class="row justify-content-around">
+                <div class="col-4">
+                    {{ form_label(filtreForm.site) }}
+                    {{ form_widget(filtreForm.site) }}
+                    <br>
+                    {{ form_label(filtreForm.search) }}
+                    {{ form_widget(filtreForm.search) }}
+                    <br>
+                    <p>Entre
+                        {{ form_widget(filtreForm.startDateTime) }}
+                        et
+                        {{ form_widget(filtreForm.registrationDeadline) }}
+                    </p>
+                </div>
+                <div class="col-4">
+                    {{ form_widget(filtreForm.organizer) }}
+                    {{ form_label(filtreForm.organizer) }}
+                    <br>
+                    {{ form_widget(filtreForm.isRegister) }}
+                    {{ form_label(filtreForm.isRegister) }}
+                    <br>
+                    {{ form_widget(filtreForm.unRegister) }}
+                    {{ form_label(filtreForm.unRegister) }}
+                    <br>
+                    {{ form_widget(filtreForm.isPast) }}
+                    {{ form_label(filtreForm.isPast) }}
+                </div>
+                <div class="row">
+                    <div class="btn">
+                        {{ form_widget(filtreForm.rechercher, { 'attr': {'class': 'btn btn-outline-info'} }) }}
+                    </div>
+                </div>
+            </div>
+            {{ form_end(filtreForm) }}
+
+            {% if events | length == 0 %}
+                <h3 class="text-center mt-5">Aucun résultat trouvé !</h3>
+            {% else %}
+                {{ include('event/index.html.twig') }}
+            {% endif %}
+        </div>
+        <div style="margin-bottom: 9em">
+            <a class="btn btn-warning position-absolute start-50 translate-middle mt-3" id="btn_new"
+               href="{{ path('app_event_new') }}" role="button">Nouvelle sortie</a>
+        </div>
+        {% else %}
+            <p>Veuillez vous connecter pour voir la liste des sorties !</p>
+        {% endif %}
+    </div>
 {% endblock %}

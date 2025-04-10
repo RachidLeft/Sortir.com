@@ -13,11 +13,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/event')]
 final class EventController extends AbstractController
 {
     #[Route(name: 'app_event_index', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function index(EventRepository $eventRepository): Response
     {
         return $this->render('event/index.html.twig', [
