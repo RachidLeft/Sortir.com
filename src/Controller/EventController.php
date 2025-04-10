@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Event;
 use App\Form\EventType;
+use App\Form\CancelEventType;
 use App\Repository\EventRepository;
 use App\Repository\SiteRepository;
 use App\Repository\StatusRepository;
@@ -22,12 +23,24 @@ final class EventController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function index(EventRepository $eventRepository): Response
     {
+        $events = $eventRepository->findAll();
+        $cancelEventForm = [];
+
+        foreach ($events as $event) {
+            $cancelEventForm[$event->getId()] = $this->createForm(CancelEventType::class, $event, [
+                'action' => $this->generateUrl('app_event_cancel', ['id' => $event->getId()]),
+                'method' => 'POST',
+            ])->createView();
+        }
+
         return $this->render('event/index.html.twig', [
             'events' => $eventRepository->findAll(),
+            'cancelEventForm' => $cancelEventForm,
         ]);
     }
 
     #[Route('/new', name: 'app_event_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
     public function new(Request $request, EntityManagerInterface $entityManager,
                         UserRepository $userRepository,
                         SiteRepository $siteRepository,
@@ -47,9 +60,9 @@ final class EventController extends AbstractController
                 $event->setLocation($newLocationData);
             }
 
-            $user = $userRepository->find(1);
-            $event->setOrganizer($user);
-            $site = $siteRepository->find(1);
+            $currentUser = $this->getUser();
+            $event->setOrganizer($currentUser);
+            $site = $currentUser->getIsAttached();
             $event->setSite($site);
 
             if ($form->get('publier')->isClicked()) {
@@ -110,6 +123,27 @@ final class EventController extends AbstractController
         return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
     }
 
-
+    #[Route('/{id}/cancel', name: 'app_event_cancel', methods: ['POST'], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_USER')]
+    public function cancel(
+        Request $request,
+        Event $event,
+        EntityManagerInterface $entityManager,
+        StatusRepository $statusRepository
+    ): Response {
+        $form = $this->createForm(CancelEventType::class, $event, [
+            'action' => $this->generateUrl('app_event_cancel', ['id' => $event->getId()]),
+            'method' => 'POST',
+        ]);
+        $form->handleRequest($request);
+    
+        if ($form->isSubmitted() && $form->isValid() && $form->get('cancel')->isClicked()) {
+            $cancelStatus = $statusRepository->find(6);
+            $event->setStatus($cancelStatus);
+            $entityManager->flush();
+        }
+    
+        return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
+    }
 
 }

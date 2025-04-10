@@ -64,7 +64,7 @@ final class UserController extends AbstractController{
         ]);
     }
 
-    #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_user_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(
         User $user
     ): Response
@@ -74,7 +74,7 @@ final class UserController extends AbstractController{
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function edit(
         Request $request, 
         User $user, 
@@ -119,7 +119,7 @@ final class UserController extends AbstractController{
         ]);
     }
 
-    #[Route('/{id}', name: 'app_user_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_user_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(
         Request $request,
@@ -135,7 +135,7 @@ final class UserController extends AbstractController{
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/{id}/edit/change-password', name: 'app_user_change_password', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit/change-password', name: 'app_user_change_password', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function changePassword(
         Request $request,
         User $user,
@@ -170,7 +170,7 @@ final class UserController extends AbstractController{
 
     }
 
-    #[Route('/{id}/activate-toggle', name: 'app_user_activate_toggle', methods: ['POST'])]
+    #[Route('/{id}/activate-toggle', name: 'app_user_activate_toggle', methods: ['POST'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function activateToggle(
         Request $request,

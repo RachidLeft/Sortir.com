@@ -1,43 +1,48 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Event index{% endblock %}
+{% block title %}Event index
+{% endblock %}
 
 {% block body %}
-    <h1>Event index</h1>
+	<h1>Event index</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>StartDateTime</th>
-                <th>Duration</th>
-                <th>RegistrationDeadline</th>
-                <th>MaxRegistration</th>
-                <th>Info</th>
-                <th>Statut</th>
-                <th>Organisateur</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for event in events %}
-            <tr>
-                <td>{{ event.name }}</td>
-                <td>{{ event.startDateTime ? event.startDateTime|date('d-m-Y H:i:s') : '' }}</td>
-                <td>{{ event.duration }}</td>
-                <td>{{ event.registrationDeadline ? event.registrationDeadline|date('d-m-Y') : '' }}</td>
-                <td>{{ event.maxRegistration }}</td>
-                <td>{{ event.info }}</td>
-                <td>{{ event.status.type }}</td>
-                <td>{{ event.organizer.username }}</td>
-                <td>
-                    <a href="{{ path('app_event_show', {'id': event.id}) }}">Afficher</a>
-                    <a href="{{ path('app_event_edit', {'id': event.id}) }}">Modifier</a>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>StartDateTime</th>
+				<th>Duration</th>
+				<th>RegistrationDeadline</th>
+				<th>MaxRegistration</th>
+				<th>Info</th>
+				<th>Statut</th>
+				<th>Organisateur</th>
+				<th>actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for event in events%}
+				<tr>
+					<td>{{ event.name }}</td>
+					<td>{{ event.startDateTime ? event.startDateTime|date('d-m-Y H:i:s') : '' }}</td>
+					<td>{{ event.duration }}</td>
+					<td>{{ event.registrationDeadline ? event.registrationDeadline|date('d-m-Y') : '' }}</td>
+					<td>{{ event.maxRegistration }}</td>
+					<td>{{ event.info }}</td>
+					<td>{{ event.status.type }}</td>
+					<td>{{ event.organizer.username }}</td>
+					<td>
+						<a href="{{ path('app_event_show', {'id': event.id}) }}">Afficher</a>
+						<a href="{{ path('app_event_edit', {'id': event.id}) }}">Modifier</a>
+						{% if app.user.id is same as(event.organizer.id) and event.status.id != 6 %}
+							{{ form_start(cancelEventForm[event.id]) }}
+							{{ form_end(cancelEventForm[event.id]) }}
+						{% endif %}
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 
-    <a href="{{ path('app_event_new') }}">Créer une sortie</a>
+	<a href="{{ path('app_event_new') }}">Créer une sortie</a>
 {% endblock %}
