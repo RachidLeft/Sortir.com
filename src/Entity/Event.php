@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\EntityListeners\EventListener;
 use App\Repository\EventRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -10,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
+#[ORM\EntityListeners([EventListener::class])]
 class Event
 {
     #[ORM\Id]
@@ -39,7 +41,7 @@ class Event
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotBlank(message: "La date de fin est obligatoire.")]
-    #[Assert\GreaterThan(propertyPath:'startDateTime', message: 'La date de fin doit être supérieure à la date de début')]
+    #[Assert\LessThan(propertyPath:'startDateTime', message: 'La date limite d\'inscription doit être antérieure à la date de début de l\'événement')]
     private ?\DateTimeInterface $registrationDeadline = null;
 
     #[ORM\Column]
