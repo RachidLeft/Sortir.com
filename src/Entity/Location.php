@@ -149,6 +149,18 @@ class Location
         return $this;
     }
 
+    public function getCityName(): ?string
+    {
+        return $this->cityName;
+    }
+
+    public function setCityName(string $cityName): static
+    {
+        $this->cityName = $cityName;
+
+        return $this;
+    }
+
     public function removeEventLocation(Event $eventLocation): static
     {
         if ($this->eventLocation->removeElement($eventLocation)) {
@@ -161,17 +173,6 @@ class Location
         return $this;
     }
 
-    public function getCityName(): ?string
-    {
-        return $this->cityName;
-    }
-
-    public function setCityName(string $cityName): static
-    {
-        $this->cityName = $cityName;
-
-        return $this;
-    }
 
     public function getPostalCode(): ?string
     {

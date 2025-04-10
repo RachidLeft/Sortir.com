@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250408102018 extends AbstractMigration
+final class Version20250409134926 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,7 +21,10 @@ final class Version20250408102018 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            ALTER TABLE event CHANGE registration_deadline registration_deadline DATE NOT NULL
+            ALTER TABLE event DROP FOREIGN KEY FK_3BAE0AA7876C4DDA
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE event ADD CONSTRAINT FK_3BAE0AA7876C4DDA FOREIGN KEY (organizer_id) REFERENCES user (id) ON DELETE CASCADE
         SQL);
     }
 
@@ -29,7 +32,10 @@ final class Version20250408102018 extends AbstractMigration
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            ALTER TABLE event CHANGE registration_deadline registration_deadline DATETIME NOT NULL
+            ALTER TABLE event DROP FOREIGN KEY FK_3BAE0AA7876C4DDA
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE event ADD CONSTRAINT FK_3BAE0AA7876C4DDA FOREIGN KEY (organizer_id) REFERENCES user (id) ON UPDATE NO ACTION ON DELETE NO ACTION
         SQL);
     }
 }

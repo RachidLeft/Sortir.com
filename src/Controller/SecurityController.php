@@ -14,7 +14,8 @@ class SecurityController extends AbstractController
     public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
     {
         if ($this->getUser()) {
-            return $this->redirectToRoute('app_main');
+
+            return $this->redirectToRoute('app_main_index');
         }
         
         // Récupère l'email du cookie s'il est défini
