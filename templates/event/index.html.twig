@@ -21,7 +21,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% for event in events if not event.hidden %}
+			{% for event in events%}
 				<tr>
 					<td>{{ event.name }}</td>
 					<td>{{ event.startDateTime ? event.startDateTime|date('d-m-Y H:i:s') : '' }}</td>
