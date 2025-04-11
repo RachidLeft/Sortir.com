@@ -31,6 +31,7 @@ final class EventController extends AbstractController
                 'action' => $this->generateUrl('app_event_cancel', ['id' => $event->getId()]),
                 'method' => 'POST',
             ])->createView();
+
         }
 
         return $this->render('event/index.html.twig', [

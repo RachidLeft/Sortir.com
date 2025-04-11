@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Form\CancelEventType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -34,48 +35,24 @@ final class MainController extends AbstractController
             $events = $eventRepo->findByRecherche(new Filtre(), $user);
         }
 
+        // annulation d'un événement
+        $cancelEventForm = [];
+
+        foreach ($events as $event) {
+            $cancelEventForm[$event->getId()] = $this->createForm(CancelEventType::class, $event, [
+                'action' => $this->generateUrl('app_event_cancel', ['id' => $event->getId()]),
+                'method' => 'POST',
+            ])->createView();
+
+        }
+
         // Les statuts seront automatiquement mis à jour par l'EventListener
         return $this->render('main/index.html.twig', [
             'events' => $events,
             'filtreForm' => $filtreForm->createView(),
+            'cancelEventForm' => $cancelEventForm,
         ]);
     }
 
 
-
-
-    // Route pour s'inscrire à un événement
-    /*#[Route('/event/register/{userId}/{eventId}', name: 'app_event_register')]
-    public function registerEvent(EventRepository $eventRepo, EntityManagerInterface $entityManager, int $userId, int $eventId): Response
-    {
-        $today = new \DateTime('now');
-        $event = $eventRepo->find($eventId);
-        $user = $entityManager->getRepository(User::class)->find($userId);
-
-        if ($today >= $event->getRegistrationDeadline()) {
-            $this->addFlash('error', "Impossible de s'inscrire, la date limite d'inscription est dépassée.");
-        } elseif ($event->getMaxRegistrations() > count($event->getUsers())) {
-            $event->addUser($user);
-            $entityManager->flush();
-            $this->addFlash('success', 'Vous êtes inscrit à l\'événement !');
-        } else {
-            $this->addFlash('danger', 'L\'événement est complet.');
-        }
-
-        return $this->redirectToRoute('app_main_index');
-    }
-
-    // Route pour se désinscrire d'un événement
-    #[Route('/event/unregister/{userId}/{eventId}', name: 'app_event_unregister')]
-    public function unregisterEvent(EventRepository $eventRepo, EntityManagerInterface $entityManager, int $userId, int $eventId): Response
-    {
-        $event = $eventRepo->find($eventId);
-        $user = $entityManager->getRepository(User::class)->find($userId);
-
-        $event->removeUser($user);
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Vous êtes désinscrit de l\'événement.');
-        return $this->redirectToRoute('app_main_index');
-    }*/
 }
