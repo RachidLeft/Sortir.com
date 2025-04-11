@@ -45,15 +45,13 @@ class UserAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        return new RedirectResponse($this->urlGenerator->generate('app_main'));
+
 
         // Stocker l'email dans un cookie
-        $email = $token->getUser()->getUserIdentifier();
-        $response->headers->setCookie(new Cookie('REMEMBERME_EMAIL', $email, strtotime('+7 days')));
+        // $email = $token->getUser()->getUserIdentifier();
+        // $response->headers->setCookie(new Cookie('REMEMBERME_EMAIL', $email, strtotime('+7 days')));
 
-        // For example:
-        // return new RedirectResponse($this->urlGenerator->generate('some_route'));
-        throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
+        return new RedirectResponse($this->urlGenerator->generate('app_main_index'));
     }
 
     protected function getLoginUrl(Request $request): string

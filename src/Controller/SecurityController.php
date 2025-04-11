@@ -19,8 +19,8 @@ class SecurityController extends AbstractController
         }
         
         // Récupère l'email du cookie s'il est défini
-        $rememberedEmail = $request->cookies->get('REMEMBERME_EMAIL', '');
-        $lastUsername = $authenticationUtils->getLastUsername() ?: $rememberedEmail;
+
+        $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render('security/login.html.twig', [
             'last_username' => $lastUsername,
