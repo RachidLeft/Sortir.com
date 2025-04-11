@@ -24,19 +24,10 @@ final class EventController extends AbstractController
     public function index(EventRepository $eventRepository): Response
     {
         $events = $eventRepository->findAll();
-        $cancelEventForm = [];
 
-        foreach ($events as $event) {
-            $cancelEventForm[$event->getId()] = $this->createForm(CancelEventType::class, $event, [
-                'action' => $this->generateUrl('app_event_cancel', ['id' => $event->getId()]),
-                'method' => 'POST',
-            ])->createView();
-
-        }
-
+        
         return $this->render('event/index.html.twig', [
-            'events' => $eventRepository->findAll(),
-            'cancelEventForm' => $cancelEventForm,
+            'events' => $events,
         ]);
     }
 
@@ -76,7 +67,7 @@ final class EventController extends AbstractController
             $entityManager->persist($event);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
 
 
@@ -124,27 +115,64 @@ final class EventController extends AbstractController
         return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/{id}/cancel', name: 'app_event_cancel', methods: ['POST'], requirements: ['id' => '\d+'])]
+    #[Route('/{id}/cancel', name: 'app_event_cancel_redirect', methods: ['GET'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_USER')]
-    public function cancel(
+    public function cancelRedirect(
         Request $request,
         Event $event,
         EntityManagerInterface $entityManager,
-        StatusRepository $statusRepository
+        StatusRepository $statusRepository,
+        EventRepository $eventRepository
     ): Response {
+        $events = $eventRepository->findAll();
+
+        // Créer le formulaire CancelEventType
         $form = $this->createForm(CancelEventType::class, $event, [
-            'action' => $this->generateUrl('app_event_cancel', ['id' => $event->getId()]),
+            'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $event->getId()]),
             'method' => 'POST',
         ]);
-        $form->handleRequest($request);
     
-        if ($form->isSubmitted() && $form->isValid() && $form->get('cancel')->isClicked()) {
-            $cancelStatus = $statusRepository->find(6);
-            $event->setStatus($cancelStatus);
-            $entityManager->flush();
-        }
-    
-        return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
+        return $this->render('event/cancel.html.twig', [
+            'cancelEventForm' => $form->createView(),
+            'event' => $event,
+        ]);
     }
 
+#[Route('/{id}/cancel', name: 'app_event_cancel_submit', methods: ['POST'], requirements: ['id' => '\d+'])]
+#[IsGranted('ROLE_USER')]
+public function cancelSubmit(
+    Request $request,
+    Event $event, // Cet event provient de l'URL (ex : id 7)
+    EntityManagerInterface $entityManager,
+    StatusRepository $statusRepository,
+    EventRepository $eventRepository
+): Response {
+    $events = $eventRepository->findAll();
+
+    $cancelForms = [];
+    foreach ($events as $evt) { // utilisation d'une variable différente pour la boucle
+        if ($this->getUser()->getId() === $evt->getOrganizer()->getId() && $evt->getStatus()->getId() === 2) {
+            $cancelForms[$evt->getId()] = $this->createForm(CancelEventType::class, $evt, [
+                'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $evt->getId()]),
+                'method' => 'POST',
+            ])->createView();
+        }
+    }
+
+    $form = $this->createForm(CancelEventType::class, $event, [
+        'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $event->getId()]),
+        'method' => 'POST',
+    ]);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid() && $form->get('cancel')->isClicked()) {
+        $cancelStatus = $statusRepository->find(6);
+        $event->setStatus($cancelStatus);
+        $motif = $form->get('motif')->getData();
+        $event->setInfo($event->getInfo() . " annulé : " . $motif);
+        $entityManager->flush();
+    }
+
+    return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+}
 }

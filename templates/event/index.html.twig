@@ -17,28 +17,25 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% for event in events%}
+			{% for evt in events%}
 				<tr>
-					<td>{{ event.name }}</td>
-					<td>{{ event.startDateTime ? event.startDateTime|date('d-m-Y H:i:s') : '' }}</td>
-					<td>{{ event.duration }}</td>
-					<td>{{ event.registrationDeadline ? event.registrationDeadline|date('d-m-Y') : '' }}</td>
-					<td>{{ event.maxRegistration }}</td>
-					<td>{{ event.info }}</td>
-					<td>{{ event.status.type }}</td>
-					<td>{{ event.organizer.username }}</td>
+					<td>{{ evt.name }}</td>
+					<td>{{ evt.startDateTime ? evt.startDateTime|date('d-m-Y H:i:s') : '' }}</td>
+					<td>{{ evt.duration }}</td>
+					<td>{{ evt.registrationDeadline ? evt.registrationDeadline|date('d-m-Y') : '' }}</td>
+					<td>{{ evt.maxRegistration }}</td>
+					<td>{{ evt.info }}</td>
+					<td>{{ evt.status.type }}</td>
+					<td>{{ evt.organizer.username }}</td>
 					<td>
-						<a href="{{ path('app_event_show', {'id': event.id}) }}">Afficher</a>
-						<a href="{{ path('app_event_edit', {'id': event.id}) }}">Modifier</a>
-						{% if app.user.id is same as(event.organizer.id) and event.status.id != 6 %}
-							{{ form_start(cancelEventForm[event.id]) }}
-							{{ form_end(cancelEventForm[event.id]) }}
+						<a href="{{ path('app_event_show', {'id': evt.id}) }}">Afficher</a>
+						<a href="{{ path('app_event_edit', {'id': evt.id}) }}">Modifier</a>
+						{% if app.user.id is same as(evt.organizer.id) and evt.status.type is same as ('Ouverte')%}
+							<a href="{{ path('app_event_cancel_redirect', {'id': evt.id}) }}" class="text-danger">Annuler la sortie</a>
 						{% endif %}
 					</td>
 				</tr>
 			{% endfor %}
 		</tbody>
 	</table>
-
-	<a href="{{ path('app_event_new') }}">Créer une sortie</a>
 {% endblock %}
