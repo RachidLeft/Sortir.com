@@ -42,9 +42,9 @@ final class EventController extends AbstractController
 
     #[Route('/new', name: 'app_event_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function new(Request $request, EntityManagerInterface $entityManager,
-                        UserRepository $userRepository,
-                        SiteRepository $siteRepository,
+    public function new(Request          $request, EntityManagerInterface $entityManager,
+                        UserRepository   $userRepository,
+                        SiteRepository   $siteRepository,
                         StatusRepository $statusRepository): Response
     {
         $event = new Event();
@@ -55,7 +55,7 @@ final class EventController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $newLocationData = $form->get('newLocation')->getData();
 
-            if ($newLocationData){
+            if ($newLocationData) {
                 $entityManager->persist($newLocationData);
                 $entityManager->flush();
                 $event->setLocation($newLocationData);
@@ -124,6 +124,63 @@ final class EventController extends AbstractController
         return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
     }
 
+
+    #[Route('/{id}/register', name: 'app_event_register', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function inscription(Request $request, Event $event, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('register' . $event->getId(), $request->getPayload()->getString('_token'))) {
+
+            $user = $this->getUser();
+
+            // Vérifier si la sortie est ouverte et si la date limite d'inscription n'est pas dépassée
+            if ($event->getStatus()->getType() !== 'Ouverte' || $event->getRegistrationDeadline() <= new \DateTime()) {
+                $this->addFlash('danger', 'Vous ne pouvez pas vous inscrire à cette sortie.');
+                return $this->redirectToRoute('app_event_index');
+            }
+
+            // Vérifier que l'utilisateur n'est pas déjà inscrit
+            if ($event->getUsers()->contains($user)) {
+                $this->addFlash('danger', 'Vous êtes déjà inscrit à cette sortie.');
+                return $this->redirectToRoute('app_event_index');
+            } else {
+                $event->addUser($user);
+                $entityManager->flush();
+                $this->addFlash('success', 'Vous êtes maintenant inscrit à la sortie.');
+            }
+
+        }
+
+        return $this->redirectToRoute('app_event_show', ['id' => $event->getId()]);
+
+    }
+
+    #[Route('/{id}/unregister', name: 'app_event_unregister', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function unregister(Request $request, Event $event, EntityManagerInterface $entityManager): Response
+    {
+
+        if ($this->isCsrfTokenValid('unregister' . $event->getId(), $request->getPayload()->getString('_token'))) {
+            $user = $this->getUser();
+
+           /* // Vérifier que la sortie n'a pas débuté
+            if ($event->getStartDateTime() <= new \DateTime()) {
+                $this->addFlash('danger', 'Vous ne pouvez pas vous désinscrire d\'une sortie qui a déjà commencé.');
+                return $this->redirectToRoute('app_event_show', ['id' => $event->getId()]);
+            }*/
+
+            // Vérifier que l'utilisateur est bien inscrit à la sortie
+            if (!$event->getUsers()->contains($user)) {
+                $this->addFlash('danger', 'Vous n\'êtes pas inscrit à cette sortie.');
+            } else {
+                $event->removeUser($user);
+                $entityManager->flush();
+                $this->addFlash('success', 'Votre désinscription a été prise en compte.');
+            }
+        }
+
+        return $this->redirectToRoute('app_event_index');
+    }
     #[Route('/{id}/cancel', name: 'app_event_cancel', methods: ['POST'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_USER')]
     public function cancel(
@@ -137,13 +194,13 @@ final class EventController extends AbstractController
             'method' => 'POST',
         ]);
         $form->handleRequest($request);
-    
+
         if ($form->isSubmitted() && $form->isValid() && $form->get('cancel')->isClicked()) {
             $cancelStatus = $statusRepository->find(6);
             $event->setStatus($cancelStatus);
             $entityManager->flush();
         }
-    
+
         return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
     }
 
