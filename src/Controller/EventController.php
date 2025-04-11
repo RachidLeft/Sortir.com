@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/event')]
+
 final class EventController extends AbstractController
 {
     #[Route(name: 'app_event_index', methods: ['GET'])]
@@ -76,7 +77,7 @@ final class EventController extends AbstractController
             $entityManager->persist($event);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
 
 
@@ -121,7 +122,7 @@ final class EventController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
     }
 
 
@@ -136,13 +137,13 @@ final class EventController extends AbstractController
             // Vérifier si la sortie est ouverte et si la date limite d'inscription n'est pas dépassée
             if ($event->getStatus()->getType() !== 'Ouverte' || $event->getRegistrationDeadline() <= new \DateTime()) {
                 $this->addFlash('danger', 'Vous ne pouvez pas vous inscrire à cette sortie.');
-                return $this->redirectToRoute('app_event_index');
+                return $this->redirectToRoute('app_main_index');
             }
 
             // Vérifier que l'utilisateur n'est pas déjà inscrit
             if ($event->getUsers()->contains($user)) {
                 $this->addFlash('danger', 'Vous êtes déjà inscrit à cette sortie.');
-                return $this->redirectToRoute('app_event_index');
+                return $this->redirectToRoute('app_main_index');
             } else {
                 $event->addUser($user);
                 $entityManager->flush();
@@ -163,12 +164,6 @@ final class EventController extends AbstractController
         if ($this->isCsrfTokenValid('unregister' . $event->getId(), $request->getPayload()->getString('_token'))) {
             $user = $this->getUser();
 
-           /* // Vérifier que la sortie n'a pas débuté
-            if ($event->getStartDateTime() <= new \DateTime()) {
-                $this->addFlash('danger', 'Vous ne pouvez pas vous désinscrire d\'une sortie qui a déjà commencé.');
-                return $this->redirectToRoute('app_event_show', ['id' => $event->getId()]);
-            }*/
-
             // Vérifier que l'utilisateur est bien inscrit à la sortie
             if (!$event->getUsers()->contains($user)) {
                 $this->addFlash('danger', 'Vous n\'êtes pas inscrit à cette sortie.');
@@ -179,7 +174,7 @@ final class EventController extends AbstractController
             }
         }
 
-        return $this->redirectToRoute('app_event_index');
+        return $this->redirectToRoute('app_main_index');
     }
     #[Route('/{id}/cancel', name: 'app_event_cancel', methods: ['POST'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_USER')]

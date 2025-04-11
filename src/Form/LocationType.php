@@ -34,7 +34,7 @@ class LocationType extends AbstractType
                 ],
 
             ])
-            ->add('latitude', TextType::class, [
+            /*->add('latitude', TextType::class, [
                 'label' => 'Latitude',
                 'required' => false,
                 'attr' => [
@@ -47,9 +47,9 @@ class LocationType extends AbstractType
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Longitude',
-                ],
+                ],*/
 
-            ])
+            /*])*/
         ;
     }
 

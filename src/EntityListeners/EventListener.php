@@ -19,6 +19,8 @@ class EventListener
         $now = new \DateTime();
         $statusRepo = $this->entityManager->getRepository(Status::class);
 
+        $unMoisPasse = (clone $now)->modify('-1 month');
+
 
         if ($event->getStartDateTime() < $now && $event->getStatus()->getType() !== 'Annulée') {
             $event->setStatus($statusRepo->findOneBy(['type' => 'Passée']));
@@ -27,7 +29,10 @@ class EventListener
         } elseif ((count($event->getUsers()) >= $event->getMaxRegistration()) ||
             ($event->getRegistrationDeadline() < $now && $now < $event->getStartDateTime())) {
             $event->setStatus($statusRepo->findOneBy(['type' => 'Cloturée']));
+        } elseif ($event->getStatus()->getType() === 'Passée' && $event->getStartDateTime() < $unMoisPasse) {
+            $event->setStatus($statusRepo->findOneBy(['type' => 'Archivée']));
         }
-        //gérer le statu Archivée
+
+
     }
 }
