@@ -25,7 +25,7 @@ final class EventController extends AbstractController
     {
         $events = $eventRepository->findAll();
 
-        
+
         return $this->render('event/index.html.twig', [
             'events' => $events,
         ]);
@@ -95,7 +95,7 @@ final class EventController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('event/edit.html.twig', [
@@ -112,7 +112,7 @@ final class EventController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/{id}/register', name: 'app_event_register', methods: ['POST'])]
@@ -188,7 +188,7 @@ final class EventController extends AbstractController
             'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $event->getId()]),
             'method' => 'POST',
         ]);
-    
+
         return $this->render('event/cancel.html.twig', [
             'cancelEventForm' => $form->createView(),
             'event' => $event,
