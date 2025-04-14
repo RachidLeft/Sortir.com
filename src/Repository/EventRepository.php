@@ -49,7 +49,7 @@ class EventRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-    public function findByRecherche(Filtre $filtre, User $user)
+    public function findByRecherche(Filtre $filtre, User $user): Paginator
     {
 
         // Création du QueryBuilder

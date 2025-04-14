@@ -43,6 +43,14 @@
                 <th>Pseudo</th>
                 <td>{{ user.username }}</td>
             </tr>
+            <tr>
+                <th>Mes groupes privés</th>
+                <td>
+                    <a href="{{ path('app_band_index') }}" class="btn btn-primary">
+                        Groupes privés ({{ user.ownedBands|length }})
+                    </a>
+                </td>
+            </tr>
         </tbody>
     </table>
 

@@ -169,7 +169,7 @@ final class EventController extends AbstractController
             }
         }
 
-        return $this->redirectToRoute('app_event_index');
+        return $this->redirectToRoute('app_main_index');
     }
 
     #[Route('/{id}/cancel', name: 'app_event_cancel_redirect', methods: ['GET'], requirements: ['id' => '\d+'])]
