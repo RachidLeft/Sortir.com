@@ -1,6 +1,4 @@
-{% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
-{% endblock %}
+
 
 {% block body %}
 	<h1 class="text-center">Liste des sorties</h1>
@@ -13,6 +11,7 @@
                 <th>Clôture des inscriptions </th>
                 <th>Inscrits/Places</th>
                 <th>Etat</th>
+                <th>Inscrit</th>
                 <th>Organisateur</th>
                 <th>Actions</th>
             </tr>
@@ -25,6 +24,11 @@
                 <td>{{ event.registrationDeadline ? event.registrationDeadline|date('d-m-Y') : '' }}</td>
                 <td>{{ event.users|length }} / {{ event.maxRegistration }} </td>
                 <td>{{ event.status.type }}</td>
+                <td>
+                    {% if event.users.contains(app.user) %}
+                        <p class="text-center">X</p>
+                    {% endif %}
+                </td>
                 <td><a href="{{ path('app_user_show', {'id': event.organizer.id}) }}">{{ event.organizer.username }}</a></td>
                 <td>
                     <a class="btn btn-primary btn-sm" href="{{ path('app_event_show', {'id': event.id}) }}">Afficher</a>
