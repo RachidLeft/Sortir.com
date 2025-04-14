@@ -1,10 +1,5 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}Event index
-{% endblock %}
-
 {% block body %}
-	<h1>Event index</h1>
+	<h1>Liste des évènements</h1>
 
 	<table class="table">
 		<thead>
@@ -34,7 +29,7 @@
 					<td>
 						<a href="{{ path('app_event_show', {'id': event.id}) }}">Afficher</a>
 						<a href="{{ path('app_event_edit', {'id': event.id}) }}">Modifier</a>
-						{% if app.user.id is same as(event.organizer.id) and event.status.id != 6 %}
+						{% if app.user.id is same as(event.organizer.id) and event.status.type is same as ('Ouverte') %}
 							{{ form_start(cancelEventForm[event.id]) }}
 							{{ form_end(cancelEventForm[event.id]) }}
 						{% endif %}
@@ -44,5 +39,4 @@
 		</tbody>
 	</table>
 
-	<a href="{{ path('app_event_new') }}">Créer une sortie</a>
 {% endblock %}

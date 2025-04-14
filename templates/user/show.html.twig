@@ -9,7 +9,7 @@
         <tbody>
             <tr>
                 <th>Ma photo</th>
-                <td><img src={{asset('uploads/pictures/' ~ user.picture)}} width="150"></img></td>
+                <td><img src={{asset('uploads/pictures/' ~ user.picture)}} width="150"></td>
             </tr>
             <tr>
                 <th>Id</th>
@@ -46,7 +46,7 @@
         </tbody>
     </table>
 
-    <a href="{{ path('app_user_index') }}">back to list</a>
+    <a href="{{ path('app_main_index') }}">back to list</a>
 
     <a href="{{ path('app_user_edit', {'id': user.id}) }}">edit</a>
 

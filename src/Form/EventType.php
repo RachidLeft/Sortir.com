@@ -47,16 +47,6 @@ class EventType extends AbstractType
                 'label' => 'Description',
 
             ])
-           /* ->add('site', EntityType::class, [
-                'class' => Site::class,
-                'choice_label'=> 'name',
-                'label' => 'Ville organisatrice',
-                'placeholder' => 'Sélectionnez un site',
-                'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('s')
-                        ->orderBy('s.name', 'ASC');
-                }
-            ])*/
             ->add('location', EntityType::class, [
                 'class' => Location::class,
                 'choice_label'=> function (Location $location) {

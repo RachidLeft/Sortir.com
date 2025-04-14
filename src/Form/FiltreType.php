@@ -25,6 +25,7 @@ class FiltreType extends AbstractType
                 'required' => false,
             ])
             ->add('search', SearchType::class,[
+                'label' => 'Mot clé',
                 'required' => false,
 
             ])
