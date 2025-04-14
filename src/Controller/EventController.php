@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Entity\Status;
 use App\Form\EventType;
 use App\Form\CancelEventType;
 use App\Repository\EventRepository;
@@ -11,6 +12,7 @@ use App\Repository\StatusRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,7 +24,7 @@ final class EventController extends AbstractController
 {
     #[Route(name: 'app_event_index', methods: ['GET'])]
     #[IsGranted('ROLE_USER')]
-    public function index(EventRepository $eventRepository): Response
+    public function index(EventRepository $eventRepository) : Response
     {
         $events = $eventRepository->findAll();
         $cancelEventForm = [];
@@ -36,16 +38,15 @@ final class EventController extends AbstractController
         }
 
         return $this->render('event/index.html.twig', [
-            'events' => $eventRepository->findAll(),
+            'events' => $events,
             'cancelEventForm' => $cancelEventForm,
         ]);
     }
 
     #[Route('/new', name: 'app_event_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function new(Request          $request, EntityManagerInterface $entityManager,
-                        UserRepository   $userRepository,
-                        SiteRepository   $siteRepository,
+    public function new(Request          $request,
+                        EntityManagerInterface $entityManager,
                         StatusRepository $statusRepository): Response
     {
         $event = new Event();
@@ -97,15 +98,30 @@ final class EventController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_event_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Event $event, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Event $event, EntityManagerInterface $entityManager, StatusRepository $statusRepository): Response
     {
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $newLocationData = $form->get('newLocation')->getData();
+
+            if ($newLocationData) {
+                $entityManager->persist($newLocationData);
+                $entityManager->flush();
+                $event->setLocation($newLocationData);
+            }
+
+            if ($form->get('publier')->isClicked()) {
+                $status = $statusRepository->findOneBy(['type' => 'Ouverte']);
+            } else {
+                $status = $statusRepository->findOneBy(['type' => 'En création']);
+            }
+
+            $event->setStatus($status);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('event/edit.html.twig', [
@@ -176,6 +192,21 @@ final class EventController extends AbstractController
 
         return $this->redirectToRoute('app_main_index');
     }
+
+    #[Route('/event/publish/{id}', name: 'app_event_publish', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function publish(Event $event, Request $request, EntityManagerInterface $entityManager): Response
+    {
+
+        if (!$this->isCsrfTokenValid('publish' . $event->getId(), $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Token CSRF invalide.');
+        }
+
+        $event->setStatus($entityManager->getRepository(Status::class)->findOneBy(['type' => 'Ouverte']));
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_main_index');
+    }
     #[Route('/{id}/cancel', name: 'app_event_cancel', methods: ['POST'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_USER')]
     public function cancel(
@@ -194,9 +225,10 @@ final class EventController extends AbstractController
             $cancelStatus = $statusRepository->find(6);
             $event->setStatus($cancelStatus);
             $entityManager->flush();
+            $this->addFlash('success', 'La sortie a été annulée avec succès.');
         }
 
-        return $this->redirectToRoute('app_event_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
     }
 
 }

@@ -1,3 +1,6 @@
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+{% endblock %}
 
 {% block body %}
 	<h1 class="text-center">Liste des sorties</h1>
@@ -24,16 +27,22 @@
                 <td>{{ event.status.type }}</td>
                 <td><a href="{{ path('app_user_show', {'id': event.organizer.id}) }}">{{ event.organizer.username }}</a></td>
                 <td>
-                    <a href="{{ path('app_event_show', {'id': event.id}) }}">Afficher</a>
-                    <a href="{{ path('app_event_edit', {'id': event.id}) }}">Modifier</a>
-                    {% if app.user.id is same as(event.organizer.id) and event.status.id != 6 %}
+                    <a class="btn btn-primary btn-sm" href="{{ path('app_event_show', {'id': event.id}) }}">Afficher</a>
+                    <a class="btn btn-primary btn-sm" href="{{ path('app_event_edit', {'id': event.id}) }}">Modifier</a>
+                    {% if app.user.id is same as(event.organizer.id) and event.status.type == 'En cours' %}
+                        <form method="post" action="{{ path('app_event_publish', {'id': event.id}) }}" style="display:inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('publish' ~ event.id) }}">
+                            <button class="btn btn-primary btn-sm">Publier</button>
+                        </form>
+                    {% endif %}
+                    {% if app.user.id is same as(event.organizer.id) and event.status.type != 'Annulée' %}
                         {{ form_start(cancelEventForm[event.id]) }}
                         {{ form_end(cancelEventForm[event.id]) }}
                     {% endif %}
                     {% if event.status.type == 'Ouverte' and event.registrationDeadline > date() and not event.users.contains(app.user) %}
                         <form method="post" action="{{ path('app_event_register', {'id': event.id}) }}" style="display:inline">
                             <input type="hidden" name="_token" value="{{ csrf_token('register' ~ event.id) }}">
-                            <button class="btn btn-success btn-sm">S'inscrire</button>
+                            <button class="btn btn-primary btn-sm">S'inscrire</button>
                         </form>
                     {% elseif event.users.contains(app.user) and event.startDateTime > date() %}
                         <form method="post" action="{{ path('app_event_unregister', {'id': event.id}) }}" style="display:inline">

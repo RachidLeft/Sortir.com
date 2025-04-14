@@ -2,12 +2,45 @@
 
 {% block title %}Edit Event{% endblock %}
 
+{% form_theme form 'bootstrap_5_layout.html.twig' %}
+
 {% block body %}
-    <h1>Edit Event</h1>
+    <div class="container mt-5 mb-5 p-5">
+        <div class="row justify-content-center" data-controller="address">
+            <h2 class="text-center">Modifer la sortie</h2>
+            {{ form_start(form, {'id': 'form'}) }}
+            <div class="row justify-content-center">
+                <div class="col-4">
+                    {{ form_row(form.name) }}
+                    {{ form_row(form.startDateTime) }}
+                    {{ form_row(form.registrationDeadline) }}
+                    {{ form_row(form.maxRegistration) }}
+                    {{ form_row(form.duration) }}
+                    {{ form_row(form.info) }}
+                </div>
+                <div class="col-4">
+                    {{ form_row(form.location, {'id': 'location'}) }}
+                    <br>
+                    <a href="#" class="btn btn-outline-secondary btn-sm" data-action="address#display_new_address">Ajouter un nouveau lieu</a>
+                    <div id="new-address" style="display:none;">
+                        {{ form_row(form.newLocation) }}
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-auto me-3">{{ form_row(form.publier, { 'attr': {'class': 'btn btn-outline-info'}}) }}</div>
+                <div class="col-auto me-3">{{ form_row(form.enregistrer, { 'attr': {'class': 'btn btn-outline-info'}}) }}</div>
+                {{ form_end(form) }}
+                <div class="col-auto">
+                    {% include 'event/_delete_form.html.twig' %}
+                </div>
+                <div class="col-auto">
+                    <a href="{{ path('app_main_index') }}">
+                        <button type="button" class="btn btn-outline-info">Annuler</button>
+                    </a>
+                </div>
 
-    {{ include('event/_form.html.twig', {'button_label': 'Update'}) }}
-
-    <a href="{{ path('app_event_index') }}">back to list</a>
-
-    {{ include('event/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
 {% endblock %}
