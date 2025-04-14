@@ -39,9 +39,15 @@ class EventType extends AbstractType
             ])
             ->add('maxRegistration', IntegerType::class, [
                 'label' => 'Nombre de places',
+                'attr' => [
+                    'min' => 1,
+                ],
             ])
             ->add('duration', IntegerType::class, [
                 'label' => 'Durée (en minutes)',
+                'attr' => [
+                    'min' => 1,
+                ],
             ])
             ->add('info', TextareaType::class, [
                 'label' => 'Description',
@@ -62,7 +68,7 @@ class EventType extends AbstractType
                'required'=> false,
             ])
             ->add('newLocation', LocationType::class, [
-                'label' => 'Ajouter un nouveau lieu',
+                'label' => 'Ajouter un nouveau lieu :',
                 'required' => false,
                 'mapped' => false,
             ])
