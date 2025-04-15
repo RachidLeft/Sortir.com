@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un nouveau groupe{% endblock %}
+
+{% block body %}
+    <h1>Créer un nouveau groupe privé</h1>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button class="btn btn-primary">Créer</button>
+    {{ form_end(form) }}
+
+    <div class="mt-3">
+        <a href="{{ path('app_band_index') }}" class="btn btn-secondary">Retour à la liste des groupes</a>
+    </div>
+{% endblock %}

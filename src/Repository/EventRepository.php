@@ -49,7 +49,7 @@ class EventRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-    public function findByRecherche(Filtre $filtre, User $user): Paginator
+    public function findByRecherche(Filtre $filtre, User $user, int $page, int $limit): Paginator
     {
 
         // Création du QueryBuilder
@@ -62,6 +62,7 @@ class EventRepository extends ServiceEntityRepository
             ->andWhere('s.type != :status')
             ->setParameter('status', 'Archivée')
             ->orderBy('e.startDateTime', 'ASC');
+
 
 
         // Filtre par recherche (nom de l'événement)
@@ -114,13 +115,40 @@ class EventRepository extends ServiceEntityRepository
                 ->setParameter('dateToDay', new \DateTime('now'));
         }
 
+        // Calcul de l'offset pour la pagination
+        $firstResult = ($page - 1) * $limit;
 
-               // Exécution de la requête
-               $query = $queryBuilder->getQuery();
-               $query->setMaxResults(50);
+
+        // Exécution de la requête avec pagination
+        $query = $queryBuilder->getQuery();
+        $query->setFirstResult($firstResult);
+        $query->setMaxResults($limit);
 
                return new Paginator($query);
 
+    }
+
+    /**
+     * Renvoie les informations de pagination pour un paginator donné
+     */
+    public function getPaginationData(Paginator $paginator, int $page, int $limit): array
+    {
+        // Calculer le nombre total d'éléments
+        $totalItems = count($paginator);
+
+        // Calculer le nombre total de pages
+        $totalPages = ceil($totalItems / $limit);
+
+        return [
+            'items' => $paginator,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalItems' => $totalItems,
+            'hasPreviousPage' => $page > 1,
+            'hasNextPage' => $page < $totalPages,
+            'previousPage' => max(1, $page - 1),
+            'nextPage' => min($totalPages, $page + 1),
+        ];
     }
 
     //    /**

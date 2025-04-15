@@ -52,6 +52,55 @@
             {% else %}
                 {{ include('event/index.html.twig') }}
             {% endif %}
+
+            {% if events | length > 0 %}
+                <div class="pagination d-flex justify-content-between mt-3">
+                    {% if pagination.hasPreviousPage %}
+                        <a href="{{ path('app_main_index', {
+                            'page': pagination.previousPage,
+                            'filtre': {
+                                'site': filtreForm.vars.value.site ? filtreForm.vars.value.site.id : null,
+                                'search': filtreForm.vars.value.search,
+                                'startDateTime': filtreForm.vars.value.startDateTime ? filtreForm.vars.value.startDateTime|date('Y-m-d') : null,
+                                'registrationDeadline': filtreForm.vars.value.registrationDeadline ? filtreForm.vars.value.registrationDeadline|date('Y-m-d') : null,
+                                'organizer': filtreForm.vars.value.organizer ? '1' : '0',
+                                'isRegister': filtreForm.vars.value.isRegister ? '1' : '0',
+                                'unRegister': filtreForm.vars.value.unRegister ? '1' : '0',
+                                'isPast': filtreForm.vars.value.isPast ? '1' : '0'
+                            }
+                        }) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-chevron-left"></i> Page précédente
+                        </a>
+                    {% else %}
+                        <span></span>
+                    {% endif %}
+
+                    <span class="align-self-center">
+                        Page {{ pagination.currentPage }} sur {{ pagination.totalPages }}
+                        ({{ pagination.totalItems }} événements)
+                    </span>
+
+                    {% if pagination.hasNextPage %}
+                        <a href="{{ path('app_main_index', {
+                            'page': pagination.nextPage,
+                            'filtre': {
+                                'site': filtreForm.vars.value.site ? filtreForm.vars.value.site.id : null,
+                                'search': filtreForm.vars.value.search,
+                                'startDateTime': filtreForm.vars.value.startDateTime ? filtreForm.vars.value.startDateTime|date('Y-m-d') : null,
+                                'registrationDeadline': filtreForm.vars.value.registrationDeadline ? filtreForm.vars.value.registrationDeadline|date('Y-m-d') : null,
+                                'organizer': filtreForm.vars.value.organizer ? '1' : '0',
+                                'isRegister': filtreForm.vars.value.isRegister ? '1' : '0',
+                                'unRegister': filtreForm.vars.value.unRegister ? '1' : '0',
+                                'isPast': filtreForm.vars.value.isPast ? '1' : '0'
+                            }
+                        }) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-chevron-left"></i> Page précédente
+                        </a>
+                    {% else %}
+                        <span></span>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
         <div style="margin-bottom: 9em">
             <a class="btn btn-warning position-absolute start-50 translate-middle mt-3" id="btn_new"
