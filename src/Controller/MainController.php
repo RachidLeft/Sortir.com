@@ -15,11 +15,12 @@ use App\Repository\EventRepository;
 use App\Repository\StatusRepository;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+
 final class MainController extends AbstractController
 {
     #[Route('/', name: 'app_main_index')]
     #[IsGranted('ROLE_USER')]
-    public function index(EventRepository $eventRepo, Request $request): Response
+    public function index(EventRepository $eventRepo, Request $request, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
         $page = $request->query->getInt('page', 1);
@@ -34,15 +35,17 @@ final class MainController extends AbstractController
 
             // Définir les valeurs du filtre à partir de l'URL
             if (isset($filtreData['site']) && $filtreData['site']) {
-                $siteRepo = $this->getDoctrine()->getRepository('App\Entity\Site');
+                $siteRepo = $entityManager->getRepository('App\Entity\Site');
                 $site = $siteRepo->find($filtreData['site']);
                 $filtre->setSite($site);
             }
 
+            // Vérifier si le filtre 'search' est actif
             if (isset($filtreData['search'])) {
                 $filtre->setSearch($filtreData['search']);
             }
 
+            //
             if (isset($filtreData['startDateTime']) && $filtreData['startDateTime']) {
                 $filtre->setStartDateTime(new \DateTime($filtreData['startDateTime']));
             }
