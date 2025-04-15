@@ -3,14 +3,39 @@
 {% block title %}Créer un nouveau groupe{% endblock %}
 
 {% block body %}
-    <h1>Créer un nouveau groupe privé</h1>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="text-center mb-4">Créer un nouveau groupe privé</h1>
 
-    {{ form_start(form) }}
-        {{ form_widget(form) }}
-        <button class="btn btn-primary">Créer</button>
-    {{ form_end(form) }}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h2>Informations du groupe</h2>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            <div class="mb-3">
+                                {{ form_label(form.name) }}
+                                {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.name) }}
+                            </div>
 
-    <div class="mt-3">
-        <a href="{{ path('app_band_index') }}" class="btn btn-secondary">Retour à la liste des groupes</a>
+                            <div class="mb-3">
+                                {{ form_label(form.members) }}
+                                {{ form_widget(form.members, {'attr': {'class': 'form-control select2'}}) }}
+                                {{ form_errors(form.members) }}
+                            </div>
+                            <div class="text-center">
+                                <button class="btn btn-primary">Enregistrer</button>
+                            </div>
+                        {{ form_end(form, {'render_rest': false}) }}
+                    </div>
+                </div>
+
+                <div class="mt-3 text-center">
+                    <a href="{{ path('app_band_index') }}" class="btn btn-secondary">Retour à la liste des groupes</a>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}
