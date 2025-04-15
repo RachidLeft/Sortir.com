@@ -97,17 +97,16 @@ class EventRepository extends ServiceEntityRepository
 
         // Filtre par inscription de l'utilisateur
         if ($filtre->getIsRegister() !== false) {
-            $queryBuilder->andWhere('(e.organizer = :userIdForOrganizer OR :userId MEMBER OF e.users)')
-                ->setParameter('userIdForOrganizer', $user->getId())
-                ->setParameter('userId', $user);
+            $queryBuilder->join('e.users', 'u')
+                ->andWhere('u.id = :userId')
+                ->setParameter('userId', $user->getId());
         }
 
         // Filtre par non-inscription de l'utilisateur
         if ($filtre->getUnRegister() !== false) {
-            $queryBuilder->andWhere('e.organizer != :userIdForNonOrganizer')
-                ->andWhere(':userNonRegister NOT MEMBER OF e.users')
-                ->setParameter('userIdForNonOrganizer', $user->getId())
-                ->setParameter('userNonRegister', $user);
+            $queryBuilder->leftJoin('e.users', 'u2')
+                ->andWhere('u2.id != :userId OR u2.id IS NULL')
+                ->setParameter('userId', $user->getId());
         }
 
         // Filtre par événements passés
