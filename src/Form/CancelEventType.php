@@ -46,8 +46,7 @@ class CancelEventType extends AbstractType
             ->add('cancel', SubmitType::class, [
                 'label' => 'Annuler la sortie',
                 'attr'  => [
-                    'class' => 'text-danger',
-                    'style' => 'background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline;'
+                    'class' => 'btn btn-outline-danger btn-sm',
                 ]
             ])
         ;

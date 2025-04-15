@@ -44,8 +44,7 @@ final class EventController extends AbstractController
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
 
-
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && ($form->get('location')->getData() || $form->get('newLocation')->getData())) {
             $newLocationData = $form->get('newLocation')->getData();
 
             if ($newLocationData) {
@@ -61,6 +60,7 @@ final class EventController extends AbstractController
 
             if ($form->get('publier')->isClicked()) {
                 $status = $statusRepository->findOneBy(['type' => 'Ouverte']);
+                $this->addFlash('success', 'La sortie a été publiée avec succès.');
             } else {
                 $status = $statusRepository->findOneBy(['type' => 'En création']);
             }
@@ -70,6 +70,8 @@ final class EventController extends AbstractController
             $entityManager->flush();
 
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+        } else {
+            $this->addFlash('danger', 'Veuillez remplir tous les champs obligatoires.');
         }
 
 
@@ -105,8 +107,10 @@ final class EventController extends AbstractController
 
             if ($form->get('publier')->isClicked()) {
                 $status = $statusRepository->findOneBy(['type' => 'Ouverte']);
+                $this->addFlash('success', 'La sortie a été publiée avec succès.');
             } else {
                 $status = $statusRepository->findOneBy(['type' => 'En création']);
+                $this->addFlash('success', 'La sortie a été modifiée avec succès.');
             }
 
             $event->setStatus($status);
@@ -127,6 +131,7 @@ final class EventController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$event->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($event);
             $entityManager->flush();
+            $this->addFlash('success', 'La sortie a été supprimée avec succès.');
         }
 
         return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
@@ -140,12 +145,6 @@ final class EventController extends AbstractController
         if ($this->isCsrfTokenValid('register' . $event->getId(), $request->getPayload()->getString('_token'))) {
 
             $user = $this->getUser();
-
-            // Vérifier si la sortie est ouverte et si la date limite d'inscription n'est pas dépassée
-            if ($event->getStatus()->getType() !== 'Ouverte' || $event->getRegistrationDeadline() <= new \DateTime()) {
-                $this->addFlash('danger', 'Vous ne pouvez pas vous inscrire à cette sortie.');
-                return $this->redirectToRoute('app_main_index');
-            }
 
             // Vérifier que l'utilisateur n'est pas déjà inscrit
             if ($event->getUsers()->contains($user)) {
@@ -195,6 +194,7 @@ final class EventController extends AbstractController
 
         $event->setStatus($entityManager->getRepository(Status::class)->findOneBy(['type' => 'Ouverte']));
         $entityManager->flush();
+        $this->addFlash('success', 'La sortie a été publiée avec succès.');
 
         return $this->redirectToRoute('app_main_index');
     }
@@ -255,6 +255,7 @@ public function cancelSubmit(
         $motif = $form->get('motif')->getData();
         $event->setInfo($event->getInfo() . " annulé : " . $motif);
         $entityManager->flush();
+        $this->addFlash('success', 'La sortie a été annulée avec succès.');
     }
 
     return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
