@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title|default('Liste des groupes privés') }}{% endblock %}
+
+{% block body %}
+    <h1>{{ title|default('Liste des groupes privés') }}</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Propriétaire</th>
+                <th>Membres</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for band in bands %}
+            <tr>
+                <td>{{ band.name }}</td>
+                <td>{{ band.owner.firstname }} {{ band.owner.lastname }}</td>
+                <td>{{ band.members|length }}</td>
+                <td>
+                    <a href="{{ path('app_band_show', {'id': band.id}) }}" class="btn btn-primary btn-sm">Voir</a>
+
+                    {# Afficher #}
+                    {% if is_granted('edit', band) %}
+                        <a href="{{ path('app_band_edit', {'id': band.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
+                    {% endif %}
+                    {% if is_granted('delete', band) %}
+                        <form method="post" action="{{ path('app_band_delete', {'id': band.id}) }}" style="display: inline-block">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ band.id) }}">
+                            <button class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce groupe ?')">Supprimer</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">Aucun groupe trouvé</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {# Afficher le bouton "Créer un nouveau groupe" uniquement lorsque l'utilisateur consulte ses propres groupes #}
+    {% if app.user == owner %}
+        <a href="{{ path('app_band_new') }}" class="btn btn-success">Créer un nouveau groupe</a>
+    {% endif %}
+{% endblock %}

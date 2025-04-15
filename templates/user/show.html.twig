@@ -31,12 +31,18 @@
                 <th>Pseudo</th>
                 <td>{{ user.username }}</td>
             </tr>
+            <tr>
+                <th>Mes groupes privés</th>
+                <td>
+                    <a href="{{ path('app_band_user', {'id': user.id}) }}" class="btn btn-primary">
+                        Groupes privés ({{ user.ownedBands|length }})
+                    </a>
+                </td>
+            </tr>
         </tbody>
     </table>
 
-    <a href="{{ path('app_main_index') }}">back to list</a>
-
-    <a href="{{ path('app_user_edit', {'id': user.id}) }}">edit</a>
+    <a href="{{ path('app_user_edit', {'id': user.id}) }}">Modifier</a>
 
     {{ include('user/_delete_form.html.twig') }}
 {% endblock %}

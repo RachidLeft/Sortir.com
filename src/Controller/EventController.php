@@ -24,7 +24,7 @@ final class EventController extends AbstractController
 {
     #[Route(name: 'app_event_index', methods: ['GET'])]
     #[IsGranted('ROLE_USER')]
-    public function index(EventRepository $eventRepository) : Response
+    public function index(EventRepository $eventRepository): Response
     {
         $events = $eventRepository->findAll();
 

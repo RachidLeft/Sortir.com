@@ -72,10 +72,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $picture = null;
 
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Band::class, orphanRemoval: true)]
+    private Collection $ownedBands;
+
+    #[ORM\ManyToMany(targetEntity: Band::class, mappedBy: 'members')]
+    private Collection $bands;
+
     public function __construct()
     {
         $this->isRegister = new ArrayCollection();
         $this->events = new ArrayCollection();
+        $this->ownedBands = new ArrayCollection();
+        $this->bands = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -287,6 +295,65 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPicture(?string $picture): static
     {
         $this->picture = $picture;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Band>
+     */
+    public function getOwnedBands(): Collection
+    {
+        return $this->ownedBands;
+    }
+
+    public function addOwnedBand(Band $band): static
+    {
+        if (!$this->ownedBands->contains($band)) {
+            $this->ownedBands->add($band);
+            $band->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOwnedBand(Band $band): static
+    {
+        if ($this->ownedBands->removeElement($band)) {
+            // set the owning side to null (unless already changed)
+            if ($band->getOwner() === $this) {
+                $band->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Band>
+     */
+    public function getBands(): Collection
+    {
+        return $this->bands;
+    }
+
+    public function addBand(Band $band): static
+    {
+        if (!$this->bands->contains($band)) {
+            $this->bands->add($band);
+            $band->addMember($this);
+        }
+
+        return $this;
+    }
+
+
+    public function removeBand(Band $band): static
+    {
+        if ($this->bands->contains($band)) {
+            $this->bands->removeElement($band);
+            $band->removeMember($this);
+        }
 
         return $this;
     }
