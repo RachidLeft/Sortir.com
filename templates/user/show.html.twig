@@ -12,16 +12,8 @@
                 <td><img src={{asset('uploads/pictures/' ~ user.picture)}} width="150"></td>
             </tr>
             <tr>
-                <th>Id</th>
-                <td>{{ user.id }}</td>
-            </tr>
-            <tr>
                 <th>Email</th>
                 <td>{{ user.email }}</td>
-            </tr>
-            <tr>
-                <th>Rôles</th>
-                <td>{{ user.roles|join(', ') }}</td>
             </tr>
             <tr>
                 <th>Nom de famille</th>
@@ -34,10 +26,6 @@
             <tr>
                 <th>Numéro de téléphone</th>
                 <td>{{ user.phone }}</td>
-            </tr>
-            <tr>
-                <th>Actif</th>
-                <td>{{ user.active ? 'Yes' : 'No' }}</td>
             </tr>
             <tr>
                 <th>Pseudo</th>

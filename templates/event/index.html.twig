@@ -1,48 +1,72 @@
 
 {% block body %}
-	<h1>Event index</h1>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nom de la sortie</th>
-                <th>Date de la sortie</th>
-                <th>Clôture des inscriptions </th>
-                <th>Inscrits/Places</th>
-                <th>Etat</th>
-                <th>Organisateur</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for event in events %}
-            <tr>
-                <td>{{ event.name }}</td>
-                <td>{{ event.startDateTime ? event.startDateTime|date('d-m-Y H:i:s') : '' }}</td>
-                <td>{{ event.registrationDeadline ? event.registrationDeadline|date('d-m-Y') : '' }}</td>
-                <td>{{ event.users|length }} / {{ event.maxRegistration }} </td>
-                <td>{{ event.status.type }}</td>
-                <td><a href="{{ path('app_user_show', {'id': event.organizer.id}) }}">{{ event.organizer.username }}</a></td>
-                <td>
-                    <a href="{{ path('app_event_show', {'id': event.id}) }}">Afficher</a>
-                    <a href="{{ path('app_event_edit', {'id': event.id}) }}">Modifier</a>
-					{% if app.user.id is same as(event.organizer.id) and event.status.type is same as ('Ouverte') %}
-						<a href="{{ path('app_event_cancel_redirect', {'id': event.id}) }}" class="text-danger">Annuler la sortie</a>
-					{% endif %}
-                    {% if event.status.type == 'Ouverte' and event.registrationDeadline > date() and not event.users.contains(app.user) %}
-                        <form method="post" action="{{ path('app_event_register', {'id': event.id}) }}" style="display:inline">
-                            <input type="hidden" name="_token" value="{{ csrf_token('register' ~ event.id) }}">
-                            <button class="btn btn-success btn-sm">S'inscrire</button>
-                        </form>
-                    {% elseif event.users.contains(app.user) and event.startDateTime > date() %}
-                        <form method="post" action="{{ path('app_event_unregister', {'id': event.id}) }}" style="display:inline">
-                            <input type="hidden" name="_token" value="{{ csrf_token('unregister' ~ event.id) }}">
-                            <button class="btn btn-warning btn-sm">Se désister</button>
-                        </form>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold text-primary">Découvre les sorties à venir 🎉</h1>
+            <p class="lead text-muted">Événements, rencontres, moments entre amis… choisis ta prochaine aventure !</p>
+        </div>
 
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for event in events %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title text-center fw-semibold text-primary mb-3"> 📍 {{ event.name|title }}</h5>
+                            <p class="card-text mb-2">
+                                <strong>Date :</strong> {{ event.startDateTime ? event.startDateTime|date('d-m-Y H:i') : '' }}<br>
+                                <strong>Clôture inscriptions :</strong> {{ event.registrationDeadline ? event.registrationDeadline|date('d-m-Y') : '' }}<br>
+                                <strong>Places :</strong> {{ event.users|length }} / {{ event.maxRegistration }}<br>
+                                <strong>État :</strong>
+                                <span class="badge
+                            {% if event.status.type == 'Ouverte' %} bg-success
+                            {% elseif event.status.type == 'Clôturée' %} bg-secondary
+                            {% elseif event.status.type == 'En cours' %} bg-primary
+                            {% elseif event.status.type == 'Annulée' %} bg-danger
+                            {% else %} bg-warning text-dark
+                            {% endif %}
+                        ">
+                            {{ event.status.type }}
+                        </span><br>
+                                <strong>Organisateur :</strong>
+                                <a href="{{ path('app_user_show', {'id': event.organizer.id}) }}">{{ event.organizer.username }}</a><br>
+                                {% if event.users.contains(app.user) %}
+                                    <strong>Inscrit : ✅</strong>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="card-footer bg-white border-0 d-flex flex-wrap gap-2">
+                            <a class="btn btn-outline-primary btn-sm" href="{{ path('app_event_show', {'id': event.id}) }}">Afficher</a>
+                            <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_event_edit', {'id': event.id}) }}">Modifier</a>
+
+                            {% if app.user.id is same as(event.organizer.id) and event.status.type == 'En cours' %}
+                                <form method="post" action="{{ path('app_event_publish', {'id': event.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('publish' ~ event.id) }}">
+                                    <button class="btn btn-success btn-sm">Publier</button>
+                                </form>
+                            {% endif %}
+
+                            {% if app.user.id is same as(event.organizer.id) and event.status.type != 'Annulée' %}
+                                {{ form_start(cancelEventForm[event.id]) }}
+                                {{ form_end(cancelEventForm[event.id]) }}
+                            {% endif %}
+
+                            {% if event.status.type == 'Ouverte' and event.registrationDeadline > date() and not event.users.contains(app.user) %}
+                                <form method="post" action="{{ path('app_event_register', {'id': event.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('register' ~ event.id) }}">
+                                    <button class="btn btn-primary btn-sm">S'inscrire</button>
+                                </form>
+                            {% elseif event.users.contains(app.user) and event.startDateTime > date() %}
+                                <form method="post" action="{{ path('app_event_unregister', {'id': event.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('unregister' ~ event.id) }}">
+                                    <button class="btn btn-warning btn-sm">Se désister</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <a href="{{ path('app_event_new') }}">Créer une sortie</a>
 {% endblock %}

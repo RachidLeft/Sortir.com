@@ -4,4 +4,11 @@
             {{ message }}
         </div>
     {% endfor %}
+  <script>
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.remove();
+            });
+        }, 5000);
+  </script>
 {% endfor %}

@@ -7,7 +7,7 @@
 {% block body %}
 
     <div class="container mt-5 mb-5 p-5">
-        <div class="row justify-content-center">
+        <div class="row justify-content-center" data-controller="address">
             <h2 class="text-center">Créer une sortie</h2>
             {{ form_start(form, {'id': 'form'}) }}
             <div class="row justify-content-center">
@@ -21,7 +21,11 @@
                 </div>
                 <div class="col-4">
                     {{ form_row(form.location, {'id': 'location'}) }}
-                    {{ form_row(form.newLocation) }}
+                    <br>
+                    <a href="#" class="btn btn-outline-secondary btn-sm" data-action="address#display_new_address">Ajouter un nouveau lieu</a>
+                    <div id="new-address" style="display:none;">
+                        {{ form_row(form.newLocation) }}
+                    </div>
                 </div>
             </div>
             <div class="row justify-content-center">
@@ -29,7 +33,7 @@
                 <div class="col-auto me-3">{{ form_row(form.enregistrer, { 'attr': {'class': 'btn btn-outline-info'}}) }}</div>
                 {{ form_end(form) }}
                 <div class="col-auto">
-                    <a href="{{ path('app_event_index') }}">
+                    <a href="{{ path('app_main_index') }}">
                         <button type="button" class="btn btn-outline-info">Annuler</button>
                     </a>
                 </div>
