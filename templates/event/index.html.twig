@@ -45,9 +45,8 @@
                                 </form>
                             {% endif %}
 
-                            {% if app.user.id is same as(event.organizer.id) and event.status.type != 'Annulée' %}
-                                {{ form_start(cancelEventForm[event.id]) }}
-                                {{ form_end(cancelEventForm[event.id]) }}
+                            {% if app.user.id is same as(event.organizer.id) and event.status.type is same as ('Ouverte') %}
+                                <a href="{{ path('app_event_cancel_redirect', {'id': event.id}) }}" class="btn btn-outline-danger btn-sm">Annuler la sortie</a>
                             {% endif %}
 
                             {% if event.status.type == 'Ouverte' and event.registrationDeadline > date() and not event.users.contains(app.user) %}
@@ -68,5 +67,4 @@
         </div>
     </div>
 
-    <a href="{{ path('app_event_new') }}">Créer une sortie</a>
 {% endblock %}

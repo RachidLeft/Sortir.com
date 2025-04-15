@@ -1,6 +1,6 @@
 <form method="post" action="{{ path('app_event_delete', {'id': event.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette sortie ?');">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id) }}">
     <div class="btn-group" role="group">
-    <button class="btn btn-outline-danger mt-3">Delete</button>
+    <button class="btn btn-outline-danger">Supprimer la sortie</button>
     </div>
 </form>
