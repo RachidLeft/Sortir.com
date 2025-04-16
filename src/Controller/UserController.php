@@ -60,6 +60,22 @@ final class UserController extends AbstractController{
             $plainPassword = $form->get('password')->getData();
             $encodedPassword = $passwordHasher->hashPassword($user, $plainPassword);
             $user->setPassword($encodedPassword);
+            $pictureFile = $form->get('picture')->getData();
+
+            if($pictureFile) {
+                $newFilename = uniqid().'.'.$pictureFile->guessExtension();
+    
+                try {
+                    $pictureFile->move(
+                        $this->getParameter('pictures_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    
+                }
+    
+                $user->setPicture($newFilename);
+            }
 
             $entityManager->persist($user);
             $entityManager->flush();
@@ -161,6 +177,54 @@ final class UserController extends AbstractController{
         }
 
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('{id}/edit/forgot-password', name: 'app_user_forgot_password', methods: ['GET', 'POST'])]
+    public function forgotPassword(Request $request, EntityManagerInterface $em, MailerInterface $mailer): Response
+    {
+        $form = $this->createForm(ResetPasswordRequestType::class);
+        $form->handleRequest($request);
+        
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data  = $form->getData();
+            $emailAddress = $data['email'];
+            
+            // Rechercher l'utilisateur par email
+            $user = $em->getRepository(User::class)->findOneBy(['email' => $emailAddress]);
+            if ($user) {
+                // Générer et stocker le token de réinitialisation
+                $token = Uuid::v4()->toRfc4122();
+                // Par exemple, enregistrez-le directement sur l'utilisateur et définir une expiration
+                $user->setResetToken($token);
+                $user->setTokenExpiresAt((new \DateTime())->modify('+1 hour'));
+                $em->flush();
+                
+                // Créer l'URL de réinitialisation
+                $resetUrl = $this->generateUrl('app_reset_password', ['token' => $token], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL);
+                
+                // Envoyer l'email
+                $emailMessage = (new Email())
+                    ->from('noreply@example.com')
+                    ->to($user->getEmail())
+                    ->subject('Réinitialisation de votre mot de passe')
+                    ->html(
+                        '<p>Bonjour,</p>
+                        <p>Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe :</p>
+                        <p><a href="' . $resetUrl . '">Réinitialiser mon mot de passe</a></p>
+                        <p>Ce lien expirera dans 1 heure.</p>'
+                    );
+                $mailer->send($emailMessage);
+                
+                $this->addFlash('success', 'Un email de réinitialisation a été envoyé.');
+            } else {
+                $this->addFlash('error', 'Aucun compte ne correspond à cet email.');
+            }
+            return $this->redirectToRoute('app_login');
+        }
+        
+        return $this->render('user/forgot_password.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     #[Route('/{id}/edit/change-password', name: 'app_user_change_password', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]

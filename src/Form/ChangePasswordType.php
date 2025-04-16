@@ -13,14 +13,11 @@ class ChangePasswordType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            // Utilisation de RepeatedType pour demander la confirmation
-            ->add('newPassword', RepeatedType::class, [
-                'type' => PasswordType::class,
-                'first_options'  => ['label' => 'Nouveau Mot de passe'],
-                'second_options' => ['label' => 'Confirmation'],
-                'invalid_message' => 'Les deux mots de passe doivent correspondre.',
-                'mapped' => false, // le nouveau mdp n'est pas mappé directement sur l'entité User
-            ]);
+        ->add('newPassword', PasswordType::class, [
+            'label' => 'Nouveau mot de passe',
+            'mapped' => false,
+            'constraints' => []
+        ]);
     }
     
     public function configureOptions(OptionsResolver $resolver): void
