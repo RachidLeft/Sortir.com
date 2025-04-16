@@ -4,128 +4,127 @@
 
 {% block body %}
     <div class="container-fluid pt-3">
-        <div class="text-center mb-4">
-            <h2 class="fw-bold text-primary">👋 Salut {{ app.user.firstname }} {{ app.user.lastname }}</h2>
-            {% if app.user %}
-            <p class="text-muted">Filtre les sorties selon tes envies 🎉</p>
-            <p class="text-secondary fst-italic"> 📅 Aujourd’hui nous sommes le {{ "now"|date('d/m/Y') }}.</p>
+    <div class="text-center mb-4">
+    <h2 class="fw-bold text-primary">👋 Salut {{ app.user.firstname }} {{ app.user.lastname }}</h2>
+    {% if app.user %}
+        <p class="text-muted">Filtre les sorties selon tes envies 🎉</p>
+        <p class="text-secondary fst-italic"> 📅 Aujourd’hui nous sommes le {{ "now"|date('d/m/Y') }}.</p>
         </div>
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 row justify-content-center">
+                {{ form_start(filtreForm) }}
 
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4 row justify-content-center">
-                        {{ form_start(filtreForm) }}
-
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(filtreForm.site) }}
-                                    {{ form_widget(filtreForm.site, {'attr': {'class': 'form-select'}}) }}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form_label(filtreForm.search) }}
-                                    {{ form_widget(filtreForm.search, {'attr': {'class': 'form-control', 'placeholder': 'Nom de la sortie...'}}) }}
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">📅 Entre deux dates :</label>
-                                    <div class="d-flex gap-2">
-                                        {{ form_widget(filtreForm.startDateTime, {'attr': {'class': 'form-control'}}) }}
-                                        <span class="align-self-center">→</span>
-                                        {{ form_widget(filtreForm.registrationDeadline, {'attr': {'class': 'form-control'}}) }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <p class="fw-semibold">🔎 Affiner les résultats :</p>
-                                <div class="form-check mb-2">
-                                    {{ form_widget(filtreForm.organizer, {'attr': {'class': 'form-check-input'}}) }}
-                                    {{ form_label(filtreForm.organizer, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                                </div>
-                                <div class="form-check mb-2">
-                                    {{ form_widget(filtreForm.isRegister, {'attr': {'class': 'form-check-input'}}) }}
-                                    {{ form_label(filtreForm.isRegister, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                                </div>
-                                <div class="form-check mb-2">
-                                    {{ form_widget(filtreForm.unRegister, {'attr': {'class': 'form-check-input'}}) }}
-                                    {{ form_label(filtreForm.unRegister, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                                </div>
-                                <div class="form-check mb-2">
-                                    {{ form_widget(filtreForm.isPast, {'attr': {'class': 'form-check-input'}}) }}
-                                    {{ form_label(filtreForm.isPast, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                                </div>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            {{ form_label(filtreForm.site) }}
+                            {{ form_widget(filtreForm.site, {'attr': {'class': 'form-select'}}) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_label(filtreForm.search) }}
+                            {{ form_widget(filtreForm.search, {'attr': {'class': 'form-control', 'placeholder': 'Nom de la sortie...'}}) }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">📅 Entre deux dates :</label>
+                            <div class="d-flex gap-2">
+                                {{ form_widget(filtreForm.startDateTime, {'attr': {'class': 'form-control'}}) }}
+                                <span class="align-self-center">→</span>
+                                {{ form_widget(filtreForm.registrationDeadline, {'attr': {'class': 'form-control'}}) }}
                             </div>
                         </div>
+                    </div>
 
-                        <div class="text-center mt-4">
-                            {{ form_widget(filtreForm.rechercher, { 'attr': {'class': 'btn btn-outline-primary px-4'} }) }}
+                    <div class="col-md-6">
+                        <p class="fw-semibold">🔎 Affiner les résultats :</p>
+                        <div class="form-check mb-2">
+                            {{ form_widget(filtreForm.organizer, {'attr': {'class': 'form-check-input'}}) }}
+                            {{ form_label(filtreForm.organizer, null, {'label_attr': {'class': 'form-check-label'}}) }}
                         </div>
-
-                        {{ form_end(filtreForm) }}
+                        <div class="form-check mb-2">
+                            {{ form_widget(filtreForm.isRegister, {'attr': {'class': 'form-check-input'}}) }}
+                            {{ form_label(filtreForm.isRegister, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                        </div>
+                        <div class="form-check mb-2">
+                            {{ form_widget(filtreForm.unRegister, {'attr': {'class': 'form-check-input'}}) }}
+                            {{ form_label(filtreForm.unRegister, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                        </div>
+                        <div class="form-check mb-2">
+                            {{ form_widget(filtreForm.isPast, {'attr': {'class': 'form-check-input'}}) }}
+                            {{ form_label(filtreForm.isPast, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                        </div>
                     </div>
                 </div>
 
+                <div class="text-center mt-4">
+                    {{ form_widget(filtreForm.rechercher, { 'attr': {'class': 'btn btn-outline-primary px-4'} }) }}
+                </div>
 
-                {% if events | length == 0 %}
-                <h3 class="text-center mt-5">Aucun résultat trouvé !</h3>
-            {% else %}
-                {{ include('event/index.html.twig') }}
-            {% endif %}
+                {{ form_end(filtreForm) }}
+            </div>
+        </div>
 
-            {% if events | length > 0 %}
-                <div class="pagination d-flex justify-content-between mt-3">
-                    {% if pagination.hasPreviousPage %}
-                        <a href="{{ path('app_main_index', {
-                            'page': pagination.previousPage,
-                            'filtre': {
-                                'site': filtreForm.vars.value.site ? filtreForm.vars.value.site.id : null,
-                                'search': filtreForm.vars.value.search,
-                                'startDateTime': filtreForm.vars.value.startDateTime ? filtreForm.vars.value.startDateTime|date('Y-m-d') : null,
-                                'registrationDeadline': filtreForm.vars.value.registrationDeadline ? filtreForm.vars.value.registrationDeadline|date('Y-m-d') : null,
-                                'organizer': filtreForm.vars.value.organizer ? '1' : '0',
-                                'isRegister': filtreForm.vars.value.isRegister ? '1' : '0',
-                                'unRegister': filtreForm.vars.value.unRegister ? '1' : '0',
-                                'isPast': filtreForm.vars.value.isPast ? '1' : '0'
-                            }
-                        }) }}" class="btn btn-outline-primary">
-                            <i class="fas fa-chevron-left"></i> Page précédente
-                        </a>
-                    {% else %}
-                        <span></span>
-                    {% endif %}
 
-                    <span class="align-self-center">
+        {% if events | length == 0 %}
+            <h3 class="text-center mt-5">Aucun résultat trouvé !</h3>
+        {% else %}
+            {{ include('event/index.html.twig') }}
+        {% endif %}
+
+        {% if events | length > 0 %}
+            <div class="pagination d-flex justify-content-between mt-3">
+                {% if pagination.hasPreviousPage %}
+                    <a href="{{ path('app_main_index', {
+                        'page': pagination.previousPage,
+                        'filtre': {
+                            'site': filtreForm.vars.value.site ? filtreForm.vars.value.site.id : null,
+                            'search': filtreForm.vars.value.search,
+                            'startDateTime': filtreForm.vars.value.startDateTime ? filtreForm.vars.value.startDateTime|date('Y-m-d') : null,
+                            'registrationDeadline': filtreForm.vars.value.registrationDeadline ? filtreForm.vars.value.registrationDeadline|date('Y-m-d') : null,
+                            'organizer': filtreForm.vars.value.organizer ? '1' : '0',
+                            'isRegister': filtreForm.vars.value.isRegister ? '1' : '0',
+                            'unRegister': filtreForm.vars.value.unRegister ? '1' : '0',
+                            'isPast': filtreForm.vars.value.isPast ? '1' : '0'
+                        }
+                    }) }}" class="btn btn-outline-primary">
+                        <i class="fas fa-chevron-left"></i> Page précédente
+                    </a>
+                {% else %}
+                    <span></span>
+                {% endif %}
+
+                <span class="align-self-center">
                         Page {{ pagination.currentPage }} sur {{ pagination.totalPages }}
                         ({{ pagination.totalItems }} événements)
                     </span>
 
-                    {% if pagination.hasNextPage %}
-                        <a href="{{ path('app_main_index', {
-                            'page': pagination.nextPage,
-                            'filtre': {
-                                'site': filtreForm.vars.value.site ? filtreForm.vars.value.site.id : null,
-                                'search': filtreForm.vars.value.search,
-                                'startDateTime': filtreForm.vars.value.startDateTime ? filtreForm.vars.value.startDateTime|date('Y-m-d') : null,
-                                'registrationDeadline': filtreForm.vars.value.registrationDeadline ? filtreForm.vars.value.registrationDeadline|date('Y-m-d') : null,
-                                'organizer': filtreForm.vars.value.organizer ? '1' : '0',
-                                'isRegister': filtreForm.vars.value.isRegister ? '1' : '0',
-                                'unRegister': filtreForm.vars.value.unRegister ? '1' : '0',
-                                'isPast': filtreForm.vars.value.isPast ? '1' : '0'
-                            }
-                        }) }}" class="btn btn-outline-primary">
-                            <i class="fas fa-chevron-left"></i> Page précédente
-                        </a>
-                    {% else %}
-                        <span></span>
-                    {% endif %}
-                </div>
-            {% endif %}
+                {% if pagination.hasNextPage %}
+                    <a href="{{ path('app_main_index', {
+                        'page': pagination.nextPage,
+                        'filtre': {
+                            'site': filtreForm.vars.value.site ? filtreForm.vars.value.site.id : null,
+                            'search': filtreForm.vars.value.search,
+                            'startDateTime': filtreForm.vars.value.startDateTime ? filtreForm.vars.value.startDateTime|date('Y-m-d') : null,
+                            'registrationDeadline': filtreForm.vars.value.registrationDeadline ? filtreForm.vars.value.registrationDeadline|date('Y-m-d') : null,
+                            'organizer': filtreForm.vars.value.organizer ? '1' : '0',
+                            'isRegister': filtreForm.vars.value.isRegister ? '1' : '0',
+                            'unRegister': filtreForm.vars.value.unRegister ? '1' : '0',
+                            'isPast': filtreForm.vars.value.isPast ? '1' : '0'
+                        }
+                    }) }}" class="btn btn-outline-primary">
+                        <i class="fas fa-chevron-left"></i> Page suivante
+                    </a>
+                {% else %}
+                    <span></span>
+                {% endif %}
+            </div>
+        {% endif %}
         </div>
         <div style="margin-bottom: 9em">
             <a class="btn btn-warning position-absolute start-50 translate-middle mt-3" id="btn_new"
                href="{{ path('app_event_new') }}" role="button">Nouvelle sortie</a>
         </div>
-        {% else %}
-            <p>Veuillez vous connecter pour voir la liste des sorties !</p>
-        {% endif %}
+    {% else %}
+        <p>Veuillez vous connecter pour voir la liste des sorties !</p>
+    {% endif %}
     </div>
 {% endblock %}

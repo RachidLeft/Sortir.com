@@ -23,7 +23,7 @@ final class MainController extends AbstractController
     {
         $user = $this->getUser();
         $page = $request->query->getInt('page', 1);
-        $limit = 5;
+        $limit = 6;
 
         // Récupérer les paramètres de filtre de l'URL
         $filtre = new Filtre();
