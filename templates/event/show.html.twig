@@ -8,38 +8,39 @@
         <p class="text-muted">Toutes les infos utiles pour participer à l'événement</p>
     </div>
 
-<div class="container d-flex justify-content-center mb-5">
-    <div class="card shadow-sm w-100" style="max-width: 700px;">
-        <div class="card-body">
-            <h5 class="card-title text-center text-uppercase fw-bold mb-4">{{ event.name }}</h5>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                    <strong>📅 Date et heure :
-                    </strong> {{ event.startDateTime ? event.startDateTime|date('d-m-Y H:i') : '' }}
-                </li>
-                <li class="list-group-item">
-                    <strong>⏰ Clôture des inscriptions :
-                    </strong> {{ event.registrationDeadline ? event.registrationDeadline|date('d-m-Y') : '' }}
-                </li>
-                <li class="list-group-item">
-                    <strong>👥 Nombre de places :</strong> {{ event.maxRegistration }}
-                </li>
-                <li class="list-group-item">
-                    <strong>⏳ Durée :</strong> {{ event.duration }} minutes
-                </li>
-                <li class="list-group-item">
-                    <strong>ℹ️ Infos :</strong> {{ event.info }}
-                </li>
-                <li class="list-group-item">
-                    <strong>🏙️ Ville organisatrice :</strong> {{ event.organizer.isAttached.name }}
-                </li>
-                <li class="list-group-item">
-                    <strong>📍 Lieu :</strong> {{ location.name }} - {{ location.street }}, {{ location.postalCode }} {{ location.cityName }}
-                </li>
-            </ul>
+    <div class="container d-flex justify-content-center mb-5">
+        <div class="card shadow-sm w-100" style="max-width: 700px;">
+            <div class="card-body">
+                <h5 class="card-title text-center text-uppercase fw-bold mb-4">{{ event.name }}</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>📅 Date et heure :
+                        </strong> {{ event.startDateTime ? event.startDateTime|date('d-m-Y H:i') : '' }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>⏰ Clôture des inscriptions :
+                        </strong> {{ event.registrationDeadline ? event.registrationDeadline|date('d-m-Y') : '' }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>👥 Nombre de places :</strong> {{ event.maxRegistration }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>⏳ Durée :</strong> {{ event.duration }} minutes
+                    </li>
+                    <li class="list-group-item">
+                        <strong>ℹ️ Infos :</strong> {{ event.info }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>🏙️ Ville organisatrice :</strong> {{ event.organizer.isAttached.name }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>📍 Lieu :</strong> {{ location.name }} - {{ location.street }}
+                        , {{ location.postalCode }} {{ location.cityName }}
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
-</div>
     <div class="container d-flex justify-content-center">
         <div class="w-100" style="max-width: 700px;">
             <h2 class="mt-4 mb-3 text-center text-success">👥 Participants</h2>
@@ -53,7 +54,8 @@
                 <tbody>
                 {% for user in event.users %}
                     <tr>
-                        <td><a href="{{ path('app_user_show', {'id': user.id}) }}" class="text-decoration-none">{{ user.username }}</a></td>
+                        <td><a href="{{ path('app_user_show', {'id': user.id}) }}"
+                               class="text-decoration-none">{{ user.username }}</a></td>
                         <td>{{ user.firstName }} {{ user.lastname }}</td>
                     </tr>
                 {% endfor %}
@@ -67,6 +69,7 @@
             🔙 Retour à l'accueil
         </a>
     </div>
+
 
 
 {% endblock %}

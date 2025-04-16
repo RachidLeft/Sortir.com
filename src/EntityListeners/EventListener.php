@@ -14,6 +14,7 @@ class EventListener
     {
         $this->entityManager = $entityManager;
     }
+
     public function postLoad(Event $event)
     {
         $now = new \DateTime();
@@ -29,7 +30,8 @@ class EventListener
         } elseif ((count($event->getUsers()) >= $event->getMaxRegistration()) ||
             ($event->getRegistrationDeadline() < $now && $now < $event->getStartDateTime())) {
             $event->setStatus($statusRepo->findOneBy(['type' => 'Cloturée']));
-        } elseif ($event->getStatus()->getType() === 'Passée' && $event->getStartDateTime() < $unMoisPasse) {
+        } elseif (($event->getStatus()->getType() === 'Passée' && $event->getStartDateTime() < $unMoisPasse) ||
+            ($event->getStatus()->getType() === 'Annulée' && $event->getStartDateTime() < $unMoisPasse)) {
             $event->setStatus($statusRepo->findOneBy(['type' => 'Archivée']));
         }
 

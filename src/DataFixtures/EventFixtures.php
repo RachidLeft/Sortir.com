@@ -10,28 +10,21 @@ use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class EventFixtures extends Fixture
 {
+    private UserPasswordHasherInterface $passwordHasher;
+
+    public function __construct(UserPasswordHasherInterface $passwordHasher)
+    {
+        $this->passwordHasher = $passwordHasher;
+    }
+
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create('fr_FR');
 
-        // Création de plusieurs utilisateurs
-        $users = [];
-        for ($i = 0; $i < 5; $i++) {
-            $user = new User();
-            $user->setEmail($faker->email)
-                ->setUsername($faker->userName)
-                ->setFirstName($faker->firstName)
-                ->setLastName($faker->lastName)
-                ->setPhone($faker->phoneNumber)
-                ->setActive(true)
-                ->setPassword('password') // Remplacez par un hash si nécessaire
-                ->setRoles(['ROLE_USER']);
-            $manager->persist($user);
-            $users[] = $user;
-        }
 
         // Création de plusieurs lieux
         $locations = [];
@@ -48,12 +41,30 @@ class EventFixtures extends Fixture
         }
 
         // Création de plusieurs sites
+        $siteNames = ['Nantes', 'Saint-Herblain', 'Rennes', 'Angers', 'Le Mans'];
         $sites = [];
-        for ($i = 0; $i < 5; $i++) {
+        foreach ($siteNames as $siteName) {
             $site = new Site();
-            $site->setName($faker->company);
+            $site->setName($siteName);
             $manager->persist($site);
             $sites[] = $site;
+        }
+
+        // Création de plusieurs utilisateurs
+        $users = [];
+        for ($i = 0; $i < 5; $i++) {
+            $user = new User();
+            $user->setEmail($faker->userName . '@campus-eni.fr')
+                ->setUsername($faker->userName)
+                ->setFirstName($faker->firstName)
+                ->setLastName($faker->lastName)
+                ->setPhone($faker->phoneNumber)
+                ->setIsAttached($site)
+                ->setActive(true)
+                ->setPassword($this->passwordHasher->hashPassword($user, '1234'))
+                ->setRoles(['ROLE_USER']);
+            $manager->persist($user);
+            $users[] = $user;
         }
 
         // Création de plusieurs statuts
@@ -66,14 +77,19 @@ class EventFixtures extends Fixture
             $statuses[] = $status;
         }
 
+        // Tableau de noms d'événements prédéfinis
+        $eventNames = ['Balade', 'Soirée dansante', 'Vélo', 'Randonnée', 'Pique-nique', 'Atelier cuisine',
+            'Visite de musée', 'Concert', 'Match de foot', 'Sortie cinéma', 'Escape game', 'Jeux de société', 'Séance de yoga',
+            'Cours de danse', 'Séance de méditation', 'Sortie en bateau', 'Visite de château', 'Atelier peinture',];
+
         // Création des événements
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 18; $i++) {
             $event = new Event();
             $startDateTime = $faker->dateTimeBetween('+3 days', '+1 month');
             $registrationDeadline = (clone $startDateTime)->modify('-2 days');
 
-            $event->setName($faker->sentence(3))
-                ->setStartDateTime($startDateTime)
+            $event->setName($faker->randomElement($eventNames)) // Choix aléatoire dans le tableau
+            ->setStartDateTime($startDateTime)
                 ->setDuration($faker->numberBetween(30, 180))
                 ->setRegistrationDeadline($registrationDeadline)
                 ->setMaxRegistration($faker->numberBetween(5, 50))
