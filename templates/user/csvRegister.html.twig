@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New User
+{% endblock %}
+
+{% block body %}
+	<div class="container my-5">
+		<h1 class="mb-4">Importer des utilisateurs via un fichier csv</h1>
+		<form action="{{ path('app_user_csv_register') }}" method="post" enctype="multipart/form-data">
+			<div class="mb-3">
+				<label for="csvFile" class="form-label">Fichier CSV</label>
+				<input type="file" class="form-control" id="csvFile" name="csvFile" accept=".csv" required>
+			</div>
+			<button type="submit" class="btn btn-primary">Importer</button>
+		</form>
+	</div>
+{% endblock %}

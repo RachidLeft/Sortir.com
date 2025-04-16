@@ -49,6 +49,7 @@ class EventRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
     public function findByRecherche(Filtre $filtre, User $user, int $page, int $limit): Paginator
     {
 
@@ -149,6 +150,19 @@ class EventRepository extends ServiceEntityRepository
             'previousPage' => max(1, $page - 1),
             'nextPage' => min($totalPages, $page + 1),
         ];
+    }
+
+    public function findEventsStartingBetween(\DateTimeInterface $start, \DateTimeInterface $end): array
+    {
+        return $this->createQueryBuilder('e')
+        ->andWhere('e.startDateTime >= :start')
+        ->andWhere('e.startDateTime <= :end')
+        ->andWhere('e.reminderSent = :reminderSent')
+        ->setParameter('start', $start)
+        ->setParameter('end', $end)
+        ->setParameter('reminderSent', false)
+        ->getQuery()
+        ->getResult();
     }
 
     //    /**

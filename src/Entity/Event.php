@@ -81,6 +81,9 @@ class Event
     #[ORM\JoinColumn(nullable: false)]
     private ?Status $status = null;
 
+    #[ORM\Column]
+    private bool $reminderSent = false;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -237,4 +240,16 @@ class Event
 
         return $this;
     }
+
+    public function isReminderSent(): bool
+    {
+        return $this->reminderSent;
+    }
+
+    public function setReminderSent(bool $reminderSent): self
+    {
+        $this->reminderSent = $reminderSent;
+        return $this;
+    }
+
 }

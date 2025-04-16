@@ -84,6 +84,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->events = new ArrayCollection();
         $this->ownedBands = new ArrayCollection();
         $this->bands = new ArrayCollection();
+        $this->active = true;
     }
 
     public function getId(): ?int

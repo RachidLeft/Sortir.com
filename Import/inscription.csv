@@ -1,5 +1,2 @@
 username,firstname,lastname,email,phone,password
-user11,John,Doe,user11@example.com,0123456789,123456
-user12,Jane,Smith,user12@example.com,0987654321,123456
-user13,Bob,Brown,bob.brown@example.com,0555123456,123456
-user14,Bob,Eni,bob.brown@campus-eni.fr,0555123456,123456
+user1000,Jean,Dubridge,jean.dubridge@campus-eni.fr,0555123456,123456
