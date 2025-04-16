@@ -19,12 +19,11 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/event')]
-
 final class EventController extends AbstractController
 {
     #[Route(name: 'app_event_index', methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]
-    public function index(EventRepository $eventRepository) : Response
+    #[IsGranted('ROLE_ADMIN')]
+    public function index(EventRepository $eventRepository): Response
     {
         $events = $eventRepository->findAll();
 
@@ -36,9 +35,9 @@ final class EventController extends AbstractController
 
     #[Route('/new', name: 'app_event_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function new(Request          $request,
+    public function new(Request                $request,
                         EntityManagerInterface $entityManager,
-                        StatusRepository $statusRepository): Response
+                        StatusRepository       $statusRepository): Response
     {
         $event = new Event();
         $form = $this->createForm(EventType::class, $event);
@@ -128,7 +127,7 @@ final class EventController extends AbstractController
     #[Route('/{id}', name: 'app_event_delete', methods: ['POST'])]
     public function delete(Request $request, Event $event, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$event->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $event->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($event);
             $entityManager->flush();
             $this->addFlash('success', 'La sortie a été supprimée avec succès.');
@@ -202,12 +201,13 @@ final class EventController extends AbstractController
     #[Route('/{id}/cancel', name: 'app_event_cancel_redirect', methods: ['GET'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_USER')]
     public function cancelRedirect(
-        Request $request,
-        Event $event,
+        Request                $request,
+        Event                  $event,
         EntityManagerInterface $entityManager,
-        StatusRepository $statusRepository,
-        EventRepository $eventRepository
-    ): Response {
+        StatusRepository       $statusRepository,
+        EventRepository        $eventRepository
+    ): Response
+    {
         $events = $eventRepository->findAll();
 
         // Créer le formulaire CancelEventType
@@ -222,43 +222,44 @@ final class EventController extends AbstractController
         ]);
     }
 
-#[Route('/{id}/cancel', name: 'app_event_cancel_submit', methods: ['POST'], requirements: ['id' => '\d+'])]
-#[IsGranted('ROLE_USER')]
-public function cancelSubmit(
-    Request $request,
-    Event $event, // Cet event provient de l'URL (ex : id 7)
-    EntityManagerInterface $entityManager,
-    StatusRepository $statusRepository,
-    EventRepository $eventRepository
-): Response {
-    $events = $eventRepository->findAll();
+    #[Route('/{id}/cancel', name: 'app_event_cancel_submit', methods: ['POST'], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_USER')]
+    public function cancelSubmit(
+        Request                $request,
+        Event                  $event, // Cet event provient de l'URL (ex : id 7)
+        EntityManagerInterface $entityManager,
+        StatusRepository       $statusRepository,
+        EventRepository        $eventRepository
+    ): Response
+    {
+        $events = $eventRepository->findAll();
 
-    $cancelForms = [];
-    foreach ($events as $evt) { // utilisation d'une variable différente pour la boucle
-        if ($this->getUser()->getId() === $evt->getOrganizer()->getId() && $evt->getStatus()->getId() === 2) {
-            $cancelForms[$evt->getId()] = $this->createForm(CancelEventType::class, $evt, [
-                'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $evt->getId()]),
-                'method' => 'POST',
-            ])->createView();
+        $cancelForms = [];
+        foreach ($events as $evt) { // utilisation d'une variable différente pour la boucle
+            if ($this->getUser()->getId() === $evt->getOrganizer()->getId() && $evt->getStatus()->getId() === 2) {
+                $cancelForms[$evt->getId()] = $this->createForm(CancelEventType::class, $evt, [
+                    'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $evt->getId()]),
+                    'method' => 'POST',
+                ])->createView();
+            }
         }
+
+        $form = $this->createForm(CancelEventType::class, $event, [
+            'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $event->getId()]),
+            'method' => 'POST',
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() && $form->get('cancel')->isClicked()) {
+            $cancelStatus = $statusRepository->find(6);
+            $event->setStatus($cancelStatus);
+            $motif = $form->get('motif')->getData();
+            $event->setInfo($event->getInfo() . " annulé : " . $motif);
+            $entityManager->flush();
+            $this->addFlash('success', 'La sortie a été annulée avec succès.');
+        }
+
+        return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
     }
-
-    $form = $this->createForm(CancelEventType::class, $event, [
-        'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $event->getId()]),
-        'method' => 'POST',
-    ]);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid() && $form->get('cancel')->isClicked()) {
-        $cancelStatus = $statusRepository->find(6);
-        $event->setStatus($cancelStatus);
-        $motif = $form->get('motif')->getData();
-        $event->setInfo($event->getInfo() . " annulé : " . $motif);
-        $entityManager->flush();
-        $this->addFlash('success', 'La sortie a été annulée avec succès.');
-    }
-
-    return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
-}
 
 }
