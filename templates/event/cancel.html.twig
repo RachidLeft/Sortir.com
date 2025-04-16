@@ -1,9 +1,54 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Event
-{% endblock %}
+{% block title %} {{ parent() }} / Annuler l'événement{% endblock %}
 
 {% block body %}
-    {{ form_start(cancelEventForm) }}
-    {{ form_end(cancelEventForm) }}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-sm border-danger border-2">
+                    <div class="card-body p-4">
+                        <h2 class="text-center text-danger fw-bold mb-3">⚠️ Annuler l'événement</h2>
+                        <p class="text-center text-muted mb-4">
+                            Merci d’indiquer un motif clair pour justifier l’annulation. Cette action est irréversible.
+                        </p>
+
+                        {{ form_start(cancelEventForm) }}
+
+                        <div class="mb-3">
+                            {{ form_label(cancelEventForm.name) }}
+                            {{ form_widget(cancelEventForm.name, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(cancelEventForm.startDateTime) }}
+                            {{ form_widget(cancelEventForm.startDateTime, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(cancelEventForm.city) }}
+                            {{ form_widget(cancelEventForm.city, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(cancelEventForm.location) }}
+                            {{ form_widget(cancelEventForm.location, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form_label(cancelEventForm.motif, "✍️ Motif de l'annulation") }}
+                            {{ form_widget(cancelEventForm.motif, {'attr': {'class': 'form-control', 'placeholder': 'Décris les raisons de l’annulation…'}}) }}
+                        </div>
+
+                        <div class="text-center">
+                            {{ form_widget(cancelEventForm.cancel, { 'attr': {'class': 'btn btn-outline-danger px-4'} }) }}
+                        </div>
+
+                        {{ form_end(cancelEventForm) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

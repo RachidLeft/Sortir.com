@@ -1,64 +1,75 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Event{% endblock %}
+{% block title %}{{ parent() }} / Détails de la sortie{% endblock %}
 
 {% block body %}
-    <h1 class="text-center mt-5 mb-5 ">Détail de la sortie</h1>
+    <div class="text-center mt-5 mb-4">
+        <h1 class="display-6 text-primary fw-bold">🗓️ Détails de la sortie</h1>
+        <p class="text-muted">Toutes les infos utiles pour participer à l'événement</p>
+    </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Nom de la sortie :</th>
-                <td>{{ event.name }}</td>
-            </tr>
-            <tr>
-                <th>Date et heure de la sortie :</th>
-                <td>{{ event.startDateTime ? event.startDateTime|date('d-m-Y H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Date limite d'inscription :</th>
-                <td>{{ event.registrationDeadline ? event.registrationDeadline|date('d-m-Y') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Nombre de places</th>
-                <td>{{ event.maxRegistration }}</td>
-            </tr>
-            <tr>
-                <th>Durée :</th>
-                <td>{{ event.duration }} minutes</td>
-            </tr>
-            <tr>
-                <th>Info :</th>
-                <td>{{ event.info }}</td>
-            </tr>
-            <tr>
-                <th>Ville organisatrise :</th>
-                <td>{{ event.organizer.isAttached.name }}</td>
-            </tr>
-            <tr>
-                <th>Location</th>
-                <td><p>Lieu : {{ location.name }} - {{ location.street }}, {{ location.postalCode }} {{ location.cityName }}</p></td>
-        </tbody>
-    </table>
-    <h2>Liste des inscrits</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Pseudo</th>
-                <th>Nom</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for user in event.users %}
-            <tr>
-                <td><a href="{{ path('app_user_show', {'id': user.id}) }}">{{ user.username }}</a></td>
-                <td>{{ user.firstName }} {{ user.lastname }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="container d-flex justify-content-center mb-5">
+        <div class="card shadow-sm w-100" style="max-width: 700px;">
+            <div class="card-body">
+                <h5 class="card-title text-center text-uppercase fw-bold mb-4">{{ event.name }}</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>📅 Date et heure :
+                        </strong> {{ event.startDateTime ? event.startDateTime|date('d-m-Y H:i') : '' }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>⏰ Clôture des inscriptions :
+                        </strong> {{ event.registrationDeadline ? event.registrationDeadline|date('d-m-Y') : '' }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>👥 Nombre de places :</strong> {{ event.maxRegistration }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>⏳ Durée :</strong> {{ event.duration }} minutes
+                    </li>
+                    <li class="list-group-item">
+                        <strong>ℹ️ Infos :</strong> {{ event.info }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>🏙️ Ville organisatrice :</strong> {{ event.organizer.isAttached.name }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>📍 Lieu :</strong> {{ location.name }} - {{ location.street }}
+                        , {{ location.postalCode }} {{ location.cityName }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container d-flex justify-content-center">
+        <div class="w-100" style="max-width: 700px;">
+            <h2 class="mt-4 mb-3 text-center text-success">👥 Participants</h2>
+            <table class="table table-bordered table-hover shadow-sm">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col">Pseudo</th>
+                    <th scope="col">Nom</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in event.users %}
+                    <tr>
+                        <td><a href="{{ path('app_user_show', {'id': user.id}) }}"
+                               class="text-decoration-none">{{ user.username }}</a></td>
+                        <td>{{ user.firstName }} {{ user.lastname }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ path('app_main_index') }}" class="btn btn-outline-info">
+            🔙 Retour à l'accueil
+        </a>
+    </div>
 
 
-    <a class="btn btn-outline-info" href="{{ path('app_main_index') }}">Retour à l'accueil</a>
 
 {% endblock %}

@@ -19,11 +19,10 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/event')]
-
 final class EventController extends AbstractController
 {
     #[Route(name: 'app_event_index', methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]
+    #[IsGranted('ROLE_ADMIN')]
     public function index(EventRepository $eventRepository): Response
     {
         $events = $eventRepository->findAll();
@@ -36,16 +35,15 @@ final class EventController extends AbstractController
 
     #[Route('/new', name: 'app_event_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function new(Request          $request,
+    public function new(Request                $request,
                         EntityManagerInterface $entityManager,
-                        StatusRepository $statusRepository): Response
+                        StatusRepository       $statusRepository): Response
     {
         $event = new Event();
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
 
-
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && ($form->get('location')->getData() || $form->get('newLocation')->getData())) {
             $newLocationData = $form->get('newLocation')->getData();
 
             if ($newLocationData) {
@@ -61,6 +59,7 @@ final class EventController extends AbstractController
 
             if ($form->get('publier')->isClicked()) {
                 $status = $statusRepository->findOneBy(['type' => 'Ouverte']);
+                $this->addFlash('success', 'La sortie a été publiée avec succès.');
             } else {
                 $status = $statusRepository->findOneBy(['type' => 'En création']);
             }
@@ -70,6 +69,8 @@ final class EventController extends AbstractController
             $entityManager->flush();
 
             return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
+        } else {
+            $this->addFlash('danger', 'Veuillez remplir tous les champs obligatoires.');
         }
 
 
@@ -105,8 +106,10 @@ final class EventController extends AbstractController
 
             if ($form->get('publier')->isClicked()) {
                 $status = $statusRepository->findOneBy(['type' => 'Ouverte']);
+                $this->addFlash('success', 'La sortie a été publiée avec succès.');
             } else {
                 $status = $statusRepository->findOneBy(['type' => 'En création']);
+                $this->addFlash('success', 'La sortie a été modifiée avec succès.');
             }
 
             $event->setStatus($status);
@@ -127,6 +130,7 @@ final class EventController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$event->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($event);
             $entityManager->flush();
+            $this->addFlash('success', 'La sortie a été supprimée avec succès.');
         }
 
         return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
@@ -140,12 +144,6 @@ final class EventController extends AbstractController
         if ($this->isCsrfTokenValid('register' . $event->getId(), $request->getPayload()->getString('_token'))) {
 
             $user = $this->getUser();
-
-            // Vérifier si la sortie est ouverte et si la date limite d'inscription n'est pas dépassée
-            if ($event->getStatus()->getType() !== 'Ouverte' || $event->getRegistrationDeadline() <= new \DateTime()) {
-                $this->addFlash('danger', 'Vous ne pouvez pas vous inscrire à cette sortie.');
-                return $this->redirectToRoute('app_main_index');
-            }
 
             // Vérifier que l'utilisateur n'est pas déjà inscrit
             if ($event->getUsers()->contains($user)) {
@@ -195,6 +193,7 @@ final class EventController extends AbstractController
 
         $event->setStatus($entityManager->getRepository(Status::class)->findOneBy(['type' => 'Ouverte']));
         $entityManager->flush();
+        $this->addFlash('success', 'La sortie a été publiée avec succès.');
 
         return $this->redirectToRoute('app_main_index');
     }
@@ -202,12 +201,13 @@ final class EventController extends AbstractController
     #[Route('/{id}/cancel', name: 'app_event_cancel_redirect', methods: ['GET'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_USER')]
     public function cancelRedirect(
-        Request $request,
-        Event $event,
+        Request                $request,
+        Event                  $event,
         EntityManagerInterface $entityManager,
-        StatusRepository $statusRepository,
-        EventRepository $eventRepository
-    ): Response {
+        StatusRepository       $statusRepository,
+        EventRepository        $eventRepository
+    ): Response
+    {
         $events = $eventRepository->findAll();
 
         // Créer le formulaire CancelEventType
@@ -222,42 +222,44 @@ final class EventController extends AbstractController
         ]);
     }
 
-#[Route('/{id}/cancel', name: 'app_event_cancel_submit', methods: ['POST'], requirements: ['id' => '\d+'])]
-#[IsGranted('ROLE_USER')]
-public function cancelSubmit(
-    Request $request,
-    Event $event, // Cet event provient de l'URL (ex : id 7)
-    EntityManagerInterface $entityManager,
-    StatusRepository $statusRepository,
-    EventRepository $eventRepository
-): Response {
-    $events = $eventRepository->findAll();
+    #[Route('/{id}/cancel', name: 'app_event_cancel_submit', methods: ['POST'], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_USER')]
+    public function cancelSubmit(
+        Request                $request,
+        Event                  $event, // Cet event provient de l'URL (ex : id 7)
+        EntityManagerInterface $entityManager,
+        StatusRepository       $statusRepository,
+        EventRepository        $eventRepository
+    ): Response
+    {
+        $events = $eventRepository->findAll();
 
-    $cancelForms = [];
-    foreach ($events as $evt) { // utilisation d'une variable différente pour la boucle
-        if ($this->getUser()->getId() === $evt->getOrganizer()->getId() && $evt->getStatus()->getId() === 2) {
-            $cancelForms[$evt->getId()] = $this->createForm(CancelEventType::class, $evt, [
-                'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $evt->getId()]),
-                'method' => 'POST',
-            ])->createView();
+        $cancelForms = [];
+        foreach ($events as $evt) { // utilisation d'une variable différente pour la boucle
+            if ($this->getUser()->getId() === $evt->getOrganizer()->getId() && $evt->getStatus()->getId() === 2) {
+                $cancelForms[$evt->getId()] = $this->createForm(CancelEventType::class, $evt, [
+                    'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $evt->getId()]),
+                    'method' => 'POST',
+                ])->createView();
+            }
         }
+
+        $form = $this->createForm(CancelEventType::class, $event, [
+            'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $event->getId()]),
+            'method' => 'POST',
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() && $form->get('cancel')->isClicked()) {
+            $cancelStatus = $statusRepository->find(6);
+            $event->setStatus($cancelStatus);
+            $motif = $form->get('motif')->getData();
+            $event->setInfo($event->getInfo() . " annulé : " . $motif);
+            $entityManager->flush();
+            $this->addFlash('success', 'La sortie a été annulée avec succès.');
+        }
+
+        return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
     }
-
-    $form = $this->createForm(CancelEventType::class, $event, [
-        'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $event->getId()]),
-        'method' => 'POST',
-    ]);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid() && $form->get('cancel')->isClicked()) {
-        $cancelStatus = $statusRepository->find(6);
-        $event->setStatus($cancelStatus);
-        $motif = $form->get('motif')->getData();
-        $event->setInfo($event->getInfo() . " annulé : " . $motif);
-        $entityManager->flush();
-    }
-
-    return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
-}
 
 }
