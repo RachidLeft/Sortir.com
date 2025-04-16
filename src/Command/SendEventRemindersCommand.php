@@ -51,7 +51,9 @@ class SendEventRemindersCommand extends Command
                     );
                 $this->mailer->send($email);
             }
+            $event->setReminderSent(true);
         }
+        $this->eventRepository->getEntityManager()->flush();
 
         $io->success('Les rappels ont été envoyés avec succès.');
         return Command::SUCCESS;

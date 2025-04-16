@@ -129,10 +129,10 @@ class EventRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('e')
         ->andWhere('e.startDateTime >= :start')
         ->andWhere('e.startDateTime <= :end')
-        ->andWhere('e.status.type = :statusType') // Seulement les événements ouverts
+        ->andWhere('e.reminderSent = :reminderSent')
         ->setParameter('start', $start)
         ->setParameter('end', $end)
-        ->setParameter('statusType', 'Ouverte') 
+        ->setParameter('reminderSent', false)
         ->getQuery()
         ->getResult();
     }

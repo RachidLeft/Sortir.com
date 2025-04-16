@@ -1,23 +1,8 @@
 framework:
-    messenger:
-        failure_transport: failed
-
-        transports:
-            # https://symfony.com/doc/current/messenger.html#transport-configuration
-            async:
-                dsn: 'sync://'
-            failed: 'doctrine://default?queue_name=failed'
-            # sync: 'sync://'
-
-        default_bus: messenger.bus.default
-
-        buses:
-            messenger.bus.default: []
-
-        routing:
-            Symfony\Component\Mailer\Messenger\SendEmailMessage: async
-            Symfony\Component\Notifier\Message\ChatMessage: async
-            Symfony\Component\Notifier\Message\SmsMessage: async
-
-            # Route your messages to the transports
-            'App\Message\RepeatTaskMessage': async
+  messenger:
+    transports:
+      scheduler_default: '%env(MESSENGER_SCHEDULER_TRANSPORT_DSN)%'
+    routing:
+    default_bus: messenger.bus.default
+    buses:
+      messenger.bus.default: []

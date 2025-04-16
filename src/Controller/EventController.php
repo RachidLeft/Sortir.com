@@ -270,7 +270,8 @@ public function cancelSubmit(
     Event $event, // Cet event provient de l'URL (ex : id 7)
     EntityManagerInterface $entityManager,
     StatusRepository $statusRepository,
-    EventRepository $eventRepository
+    EventRepository $eventRepository,
+    MailerInterface $mailer
 ): Response {
     $events = $eventRepository->findAll();
 
@@ -296,6 +297,20 @@ public function cancelSubmit(
         $motif = $form->get('motif')->getData();
         $event->setInfo($event->getInfo() . " annulé : " . $motif);
         $entityManager->flush();
+    }
+
+    foreach ($event->getUsers() as $user) {
+        $email = (new Email())
+            ->from('noreply@example.com')
+            ->to($user->getEmail())
+            ->subject('Annulation de l\'événement ' . $event->getName())
+            ->html(
+                '<p>Bonjour ' . $user->getUsername() . ',</p>
+                <p>L\'événement <strong>' . $event->getName() . '</strong> a été annulé pour le motif suivant : ' . $motif . '</p>
+                <p>Cordialement,</p>
+                <p>L\'équipe.</p>'
+            );
+        $mailer->send($email);
     }
 
     return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
