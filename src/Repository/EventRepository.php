@@ -49,6 +49,7 @@ class EventRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
     public function findByRecherche(Filtre $filtre, User $user)
     {
 
@@ -121,6 +122,19 @@ class EventRepository extends ServiceEntityRepository
 
                return new Paginator($query);
 
+    }
+
+    public function findEventsStartingBetween(\DateTimeInterface $start, \DateTimeInterface $end): array
+    {
+        return $this->createQueryBuilder('e')
+        ->andWhere('e.startDateTime >= :start')
+        ->andWhere('e.startDateTime <= :end')
+        ->andWhere('e.status.type = :statusType') // Seulement les événements ouverts
+        ->setParameter('start', $start)
+        ->setParameter('end', $end)
+        ->setParameter('statusType', 'Ouverte') 
+        ->getQuery()
+        ->getResult();
     }
 
     //    /**

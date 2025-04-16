@@ -14,6 +14,12 @@
 				{% if app.user %}
 					<li class="nav-item">
 						<a class="nav-link" href="{{ path('app_main_index') }}">Accueil</a>
+					</li>
+					{% if is_granted('ROLE_ADMIN') %}
+						<li class="nav-item">
+							<a class="nav-link" href="{{ path('app_user_register') }}">Inscrire</a>
+						</li>
+					{% endif %}
 					<li class="nav-item">
 						<a class="nav-link" href="{{ path('app_user_show', {'id': app.user.id}) }}">Mon profil</a>
 					</li>

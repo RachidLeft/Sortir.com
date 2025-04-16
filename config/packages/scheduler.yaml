@@ -1,0 +1,5 @@
+scheduler:
+    schedules:
+        repeat_task_schedule:
+            expression: '*/10 * * * *' # Toutes les 10 minutes
+            message: 'App\Message\RepeatTaskMessage'

@@ -76,6 +76,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->isRegister = new ArrayCollection();
         $this->events = new ArrayCollection();
+        $this->active = true;
     }
 
     public function getId(): ?int

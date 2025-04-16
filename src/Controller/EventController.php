@@ -17,6 +17,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 #[Route('/event')]
 
@@ -36,9 +38,11 @@ final class EventController extends AbstractController
 
     #[Route('/new', name: 'app_event_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function new(Request          $request,
-                        EntityManagerInterface $entityManager,
-                        StatusRepository $statusRepository): Response
+    public function new(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        StatusRepository $statusRepository
+    ): Response
     {
         $event = new Event();
         $form = $this->createForm(EventType::class, $event);
@@ -135,7 +139,12 @@ final class EventController extends AbstractController
 
     #[Route('/{id}/register', name: 'app_event_register', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function inscription(Request $request, Event $event, EntityManagerInterface $entityManager): Response
+    public function inscription(
+        Request $request,
+        Event $event, 
+        EntityManagerInterface $entityManager,
+        MailerInterface $mailer
+    ): Response
     {
         if ($this->isCsrfTokenValid('register' . $event->getId(), $request->getPayload()->getString('_token'))) {
 
@@ -152,9 +161,23 @@ final class EventController extends AbstractController
                 $this->addFlash('danger', 'Vous êtes déjà inscrit à cette sortie.');
                 return $this->redirectToRoute('app_main_index');
             } else {
+                //ajout de l'utilisateur à la bdd
                 $event->addUser($user);
                 $entityManager->flush();
                 $this->addFlash('success', 'Vous êtes maintenant inscrit à la sortie.');
+
+                //envoi de l'email à l'utilisateur inscrit
+                $email = (new Email())
+                ->from('noreply@example.com')
+                ->to($user->getEmail())
+                ->subject('Inscription à l\'évènement ' . $event->getName())
+                ->html(
+                    '<p>Bonjour,</p>
+                    <p>Vous êtes inscrit à l\'évènement <strong>' . $event->getName() . '</strong>.</p>
+                    <p>Cordialement,</p>
+                    <p>L\'équipe.</p>'
+                );
+                $mailer->send($email);
             }
 
         }
@@ -165,7 +188,11 @@ final class EventController extends AbstractController
 
     #[Route('/{id}/unregister', name: 'app_event_unregister', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
-    public function unregister(Request $request, Event $event, EntityManagerInterface $entityManager): Response
+    public function unregister(
+        Request $request,
+        Event $event,
+        EntityManagerInterface $entityManager,
+        MailerInterface $mailer): Response
     {
 
         if ($this->isCsrfTokenValid('unregister' . $event->getId(), $request->getPayload()->getString('_token'))) {
@@ -175,9 +202,23 @@ final class EventController extends AbstractController
             if (!$event->getUsers()->contains($user)) {
                 $this->addFlash('danger', 'Vous n\'êtes pas inscrit à cette sortie.');
             } else {
+                //suppression de l'utilisateur de la bdd
                 $event->removeUser($user);
                 $entityManager->flush();
                 $this->addFlash('success', 'Votre désinscription a été prise en compte.');
+
+                //envoi de l'email à l'utilisateur désinscrit
+                $email = (new Email())
+                ->from('noreply@example.com')
+                ->to($user->getEmail())
+                ->subject('Désistement à l\'évènement ' . $event->getName())
+                ->html(
+                    '<p>Bonjour,</p>
+                    <p>Vous êtes désinscrit de l\'évènement <strong>' . $event->getName() . '</strong>.</p>
+                    <p>Cordialement,</p>
+                    <p>L\'équipe.</p>'
+                );
+                $mailer->send($email);
             }
         }
 
