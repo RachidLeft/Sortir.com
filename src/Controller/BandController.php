@@ -19,7 +19,10 @@ class BandController extends AbstractController
     #[Route('/', name: 'app_band_index', methods: ['GET'])]
     public function index(BandRepository $bandRepository): Response
     {
-        // Récupérer tous les groupes au lieu de seulement ceux de l'utilisateur
+        /**
+         * Récupérer tous les groupes au lieu de seulement ceux de l'utilisateur
+         * Et récupère l'utilisateur connecté
+         */
         $bands = $bandRepository->findAll();
         $user = $this->getUser();
 
@@ -32,14 +35,18 @@ class BandController extends AbstractController
     #[Route('/user/{id}', name: 'app_band_user', methods: ['GET'])]
     public function userBands(int $id, BandRepository $bandRepository, EntityManagerInterface $entityManager): Response
     {
-        // Récupérer l'utilisateur correspondant à l'ID
+        /**
+         * Récupérer l'utilisateur correspondant à l'ID donnée
+         */
         $user = $entityManager->getRepository('App\Entity\User')->find($id);
 
         if (!$user) {
             throw $this->createNotFoundException('Utilisateur non trouvé');
         }
 
-        // Récupérer tous les groupes de cet utilisateur
+        /**
+         * Récupérer tous les groupes appartenant à cet utilisateur
+         */
         $bands = $bandRepository->findBy(['owner' => $user]);
 
         return $this->render('band/index.html.twig', [
@@ -52,18 +59,35 @@ class BandController extends AbstractController
     #[Route('/new', name: 'app_band_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        /**
+         * Créer un nouveau groupe
+         * Récupérer l'utilisateur connecté
+         * Créer un nouveau groupe et le lier à l'utilisateur
+         */
         $band = new Band();
-        $band->setOwner($this->getUser());
+        $user = $this->getUser();
+        $band->setOwner($user);
 
+        /**
+         * Crée un formulaire pour l'entité Band en utilisant le formulaire type BandType
+         * Traite la requête HTTP pour remplir le formulaire avec les données soumises
+         */
         $form = $this->createForm(BandType::class, $band);
         $form->handleRequest($request);
 
+        /**
+         * Vérifie si le formulaire a été soumis et est valide
+         * Si oui, persiste le groupe dans la base de données
+         * Ajoute un message flash de succès
+         * Redirige vers la liste des groupes de l'utilisateur connecté
+         */
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($band);
             $entityManager->flush();
 
             $this->addFlash('success', 'Votre groupe a été créé avec succès.');
-            return $this->redirectToRoute('app_band_index', [], Response::HTTP_SEE_OTHER);
+            // Redirection vers les groupes de l'utilisateur connecté
+            return $this->redirectToRoute('app_band_user', ['id' => $user->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('band/new.html.twig', [
@@ -75,47 +99,67 @@ class BandController extends AbstractController
     #[Route('/{id}', name: 'app_band_show', methods: ['GET'])]
     public function show(Band $band): Response
     {
-        // Vérification que l'utilisateur est bien le propriétaire du groupe
-        $this->denyAccessUnlessGranted('view', $band);
-
         return $this->render('band/show.html.twig', [
             'band' => $band,
         ]);
     }
 
-#[Route('/{id}/edit', name: 'app_band_edit', methods: ['GET', 'POST'])]
-public function edit(Request $request, Band $band, EntityManagerInterface $entityManager): Response
-{
-    // Utiliser le voter au lieu de la vérification directe
-    $this->denyAccessUnlessGranted('edit', $band);
+    #[Route('/{id}/edit', name: 'app_band_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Band $band, EntityManagerInterface $entityManager): Response
+    {
+        /**
+         * Vérifie si l'utilisateur a le droit d'éditer ce groupe.
+         * Si ce n'est pas le cas, une exception d'accès refusé est lancée
+         */
+        $this->denyAccessUnlessGranted('edit', $band);
 
-    $form = $this->createForm(BandType::class, $band);
-    $form->handleRequest($request);
+        /**
+         * Crée un formulaire pour l'entité Band en utilisant le formulaire type BandType
+         * Traite la requête HTTP pour remplir le formulaire avec les données soumises
+         */
+        $form = $this->createForm(BandType::class, $band);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $entityManager->flush();
+        /**
+         * Vérifie si le formulaire a été soumis et est valide
+         * Si oui, met à jour le groupe dans la base de données
+         * Ajoute un message flash de succès
+         * Redirige vers la page
+         */
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+            $this->addFlash('success', 'Le groupe a été modifié avec succès');
 
-        return $this->redirectToRoute('app_band_index');
+            $userId = $this->getUser();
+            return $this->redirectToRoute('app_band_user', ['id' => $userId->getId()], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('band/edit.html.twig', [
+            'band' => $band,
+            'form' => $form,
+        ]);
     }
 
-    return $this->render('band/edit.html.twig', [
-        'band' => $band,
-        'form' => $form,
-    ]);
-}
+    #[Route('/{id}', name: 'app_band_delete', methods: ['POST'])]
+    public function delete(Request $request, Band $band, EntityManagerInterface $entityManager): Response
+    {
+        // Utiliser le voter au lieu de la vérification directe
+        $this->denyAccessUnlessGranted('delete', $band);
 
-#[Route('/{id}', name: 'app_band_delete', methods: ['POST'])]
-public function delete(Request $request, Band $band, EntityManagerInterface $entityManager): Response
-{
-    // Utiliser le voter au lieu de la vérification directe
-    $this->denyAccessUnlessGranted('delete', $band);
+        if ($this->isCsrfTokenValid('delete'.$band->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($band);
+            $entityManager->flush();
+            $this->addFlash('success', 'Le groupe a été supprimé.');
+        }
 
-    if ($this->isCsrfTokenValid('delete'.$band->getId(), $request->request->get('_token'))) {
-        $entityManager->remove($band);
-        $entityManager->flush();
-        $this->addFlash('success', 'Le groupe a été supprimé.');
+        $user = $this->getUser();
+        $isAdmin = in_array('ROLE_ADMIN', $user->getRoles());
+
+        // Redirection différente selon le rôle et le contexte
+        if ($isAdmin && $request->headers->get('referer') && str_contains($request->headers->get('referer'), '/band/')) {
+            return $this->redirectToRoute('app_band_index');
+        } else {
+            return $this->redirectToRoute('app_band_user', ['id' => $user->getId()]);
+        }
     }
-
-    return $this->redirectToRoute('app_band_index');
-}
 }

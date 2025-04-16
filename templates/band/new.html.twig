@@ -16,24 +16,24 @@
                         {{ form_start(form) }}
                             <div class="mb-3">
                                 {{ form_label(form.name) }}
-                                {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_widget(form.name) }}
                                 {{ form_errors(form.name) }}
                             </div>
 
-                            <div class="mb-3">
-                                {{ form_label(form.members) }}
-                                {{ form_widget(form.members, {'attr': {'class': 'form-control select2'}}) }}
-                                {{ form_errors(form.members) }}
-                            </div>
-                            <div class="text-center">
-                                <button class="btn btn-primary">Enregistrer</button>
-                            </div>
-                        {{ form_end(form, {'render_rest': false}) }}
+                        <div class="mb-3">
+                            {{ form_label(form.members) }}
+                            {{ form_widget(form.members) }}
+                            {{ form_errors(form.members) }}
+                        </div>
+                        <div class="text-center">
+                            {{ form_widget(form.enregistrer, {'attr': {'class': 'btn btn-primary'}}) }}
+                        </div>
+                        {{ form_end(form) }}
                     </div>
                 </div>
 
                 <div class="mt-3 text-center">
-                    <a href="{{ path('app_band_index') }}" class="btn btn-secondary">Retour à la liste des groupes</a>
+                    <a href="{{ path('app_band_user', {'id': app.user.id}) }}" class="btn btn-secondary">Retour à la liste des groupes</a>
                 </div>
             </div>
         </div>
