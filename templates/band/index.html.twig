@@ -7,12 +7,12 @@
 
     <table class="table">
         <thead>
-            <tr>
-                <th>Nom</th>
-                <th>Propriétaire</th>
-                <th>Membres</th>
-                <th>Actions</th>
-            </tr>
+        <tr>
+            <th>Nom</th>
+            <th>Propriétaire</th>
+            <th>Membres</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
         {% for band in bands %}
@@ -21,16 +21,16 @@
                 <td>{{ band.owner.firstname }} {{ band.owner.lastname }}</td>
                 <td>{{ band.members|length }}</td>
                 <td>
-                    <a href="{{ path('app_band_show', {'id': band.id}) }}" class="btn btn-primary btn-sm">Voir</a>
+                    <a href="{{ path('app_band_show', {'id': band.id}) }}" class="btn btn-primary btn-sm">Détail</a>
 
-                    {# Afficher #}
                     {% if is_granted('edit', band) %}
-                        <a href="{{ path('app_band_edit', {'id': band.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
+                        <a href="{{ path('app_band_edit', {'id': band.id}) }}" class="btn btn-outline-warning btn-sm">Modifier</a>
                     {% endif %}
+
                     {% if is_granted('delete', band) %}
                         <form method="post" action="{{ path('app_band_delete', {'id': band.id}) }}" style="display: inline-block">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ band.id) }}">
-                            <button class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce groupe ?')">Supprimer</button>
+                            <button class="btn btn-outline-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce groupe ?')">Supprimer</button>
                         </form>
                     {% endif %}
                 </td>
@@ -43,8 +43,7 @@
         </tbody>
     </table>
 
-    {# Afficher le bouton "Créer un nouveau groupe" uniquement lorsque l'utilisateur consulte ses propres groupes #}
-    {% if app.user == owner %}
+    {% if app.user.id == owner.id and app.request.get('_route') == 'app_band_user' %}
         <a href="{{ path('app_band_new') }}" class="btn btn-success">Créer un nouveau groupe</a>
     {% endif %}
 {% endblock %}

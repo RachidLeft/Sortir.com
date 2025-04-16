@@ -29,14 +29,25 @@ class BandVoter extends Voter
         /** @var Band $band */
         $band = $subject;
 
+        $isAdmin = in_array('ROLE_ADMIN', $user->getRoles());
+
         switch ($attribute) {
             case self::VIEW:
-                // Tout utilisateur authentifié peut voir un groupe
+                /**
+                 * Tout utilisateur authentifié peut voir un groupe
+                 */
                 return true;
             case self::EDIT:
-            case self::DELETE:
-                // Seul le propriétaire peut éditer ou supprimer
+                /**
+                 * Seul le propriétaire peut éditer ou supprimer
+                 */
                 return $user === $band->getOwner();
+            case self::DELETE:
+                /**
+                 * Seul le propriétaire peut éditer ou supprimer
+                 * L'admin peut aussi supprimer
+                 */
+                return $user === $band->getOwner() || $isAdmin;
         }
 
         return false;
