@@ -30,6 +30,12 @@
                     <li class="list-group-item">
                         🕵️‍♂️ <strong>Pseudo :</strong> {{ user.username }}
                     </li>
+                    <li class="list-group-item">
+                        <strong>Mes groupes privés</strong>
+                        <a href="{{ path('app_band_user', {'id': user.id}) }}" class="btn btn-primary">
+                            Groupes privés ({{ user.ownedBands|length }})
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
