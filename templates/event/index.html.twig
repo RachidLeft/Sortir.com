@@ -1,3 +1,4 @@
+
 {% block body %}
     <div class="container my-5">
         <div class="text-center mb-5">
@@ -41,8 +42,10 @@
                             </p>
                         </div>
                         <div class="card-footer bg-white border-0 d-flex flex-wrap gap-2">
-                            <a class="btn btn-outline-primary btn-sm"
-                               href="{{ path('app_event_show', {'id': event.id}) }}">Afficher</a>
+                            {% if event.status.type in ['En cours', 'Clôturée', 'Ouverte'] %}
+                                <a class="btn btn-outline-primary btn-sm"
+                                   href="{{ path('app_event_show', {'id': event.id}) }}">Afficher</a>
+                            {% endif %}
                             {% if app.user.id is same as(event.organizer.id) and event.status.type == 'En création' %}
                                 <a class="btn btn-outline-secondary btn-sm"
                                    href="{{ path('app_event_edit', {'id': event.id}) }}">Modifier</a>
@@ -60,7 +63,8 @@
                                    class="btn btn-outline-danger btn-sm">Annuler la sortie</a>
                             {% endif %}
 
-                            {% if event.status.type == 'Ouverte' and event.registrationDeadline > date() and not event.users.contains(app.user) %}
+                            {% if event.status.type == 'Ouverte' and event.registrationDeadline > date()
+                                and not event.users.contains(app.user) %}
                                 <form method="post" action="{{ path('app_event_register', {'id': event.id}) }}">
                                     <input type="hidden" name="_token" value="{{ csrf_token('register' ~ event.id) }}">
                                     <button class="btn btn-primary btn-sm">S'inscrire</button>
