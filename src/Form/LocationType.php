@@ -25,7 +25,7 @@ class LocationType extends AbstractType
             ->add('cityName', TextType::class, [
                 'label' => 'Nom de la ville',
                 'attr' => [
-                'placeholder' => 'Ville',]
+                    'placeholder' => 'Ville',]
             ])
             ->add('postalCode', TextType::class, [
                 'label' => 'Code postal',
@@ -34,7 +34,7 @@ class LocationType extends AbstractType
                 ],
 
             ])
-            /*->add('latitude', TextType::class, [
+            ->add('latitude', TextType::class, [
                 'label' => 'Latitude',
                 'required' => false,
                 'attr' => [
@@ -47,10 +47,9 @@ class LocationType extends AbstractType
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Longitude',
-                ],*/
+                ],
 
-            /*])*/
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

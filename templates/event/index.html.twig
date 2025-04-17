@@ -35,27 +35,23 @@
                                 <a href="{{ path('app_user_show', {'id': event.organizer.id}) }}">{{ event.organizer.username }}</a><br>
                                 {% if event.users.contains(app.user) %}
                                     <strong>Inscrit : ✅</strong>
-                                {% elseif event.status.type is same as ('Ouverte') %}
-                                    <strong>Inscrit : Rejoins-nous ! 🎉</strong>
                                 {% endif %}
                             </p>
                         </div>
                         <div class="card-footer bg-white border-0 d-flex flex-wrap gap-2">
                             <a class="btn btn-outline-primary btn-sm"
                                href="{{ path('app_event_show', {'id': event.id}) }}">Afficher</a>
-                            {% if app.user.id is same as(event.organizer.id) and event.status.type == 'En création' %}
-                                <a class="btn btn-outline-secondary btn-sm"
-                                   href="{{ path('app_event_edit', {'id': event.id}) }}">Modifier</a>
-                            {% endif %}
-                            {% if app.user.id is same as(event.organizer.id) and event.status.type == 'En création' %}
+                            <a class="btn btn-outline-secondary btn-sm"
+                               href="{{ path('app_event_edit', {'id': event.id}) }}">Modifier</a>
+
+                            {% if app.user.id is same as(event.organizer.id) and event.status.type == 'En cours' %}
                                 <form method="post" action="{{ path('app_event_publish', {'id': event.id}) }}">
                                     <input type="hidden" name="_token" value="{{ csrf_token('publish' ~ event.id) }}">
-                                    <button class="btn btn-outline-success btn-sm">Publier</button>
+                                    <button class="btn btn-success btn-sm">Publier</button>
                                 </form>
                             {% endif %}
 
-                            {% if (app.user.id is same as(event.organizer.id) or is_granted('ROLE_ADMIN')) and
-                                (event.status.type is same as ('Ouverte') or event.status.type is same as ('Clôturée')) %}
+                            {% if app.user.id is same as(event.organizer.id) and event.status.type is same as ('Ouverte') %}
                                 <a href="{{ path('app_event_cancel_redirect', {'id': event.id}) }}"
                                    class="btn btn-outline-danger btn-sm">Annuler la sortie</a>
                             {% endif %}
@@ -69,7 +65,7 @@
                                 <form method="post" action="{{ path('app_event_unregister', {'id': event.id}) }}">
                                     <input type="hidden" name="_token"
                                            value="{{ csrf_token('unregister' ~ event.id) }}">
-                                    <button class="btn btn-outline-warning btn-sm">Se désister</button>
+                                    <button class="btn btn-warning btn-sm">Se désister</button>
                                 </form>
                             {% endif %}
                         </div>

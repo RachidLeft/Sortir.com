@@ -11,7 +11,8 @@
         <div class="card shadow-lg mx-auto" style="max-width: 600px;">
             <div class="card-body">
                 <div class="text-center mb-4">
-                    <img src="{{ asset('uploads/pictures/' ~ user.picture) }}" alt="Photo de profil" class="rounded-circle shadow-sm border border-3 border-primary" width="150" height="150">
+                    <img src="{{ asset('uploads/pictures/' ~ user.picture) }}" alt="Photo de profil"
+                         class="rounded-circle shadow-sm border border-3 border-primary" width="150" height="150">
                 </div>
 
                 <ul class="list-group list-group-flush fs-5">
@@ -30,6 +31,11 @@
                     <li class="list-group-item">
                         🕵️‍♂️ <strong>Pseudo :</strong> {{ user.username }}
                     </li>
+                    <li class="list-group-item">
+                        <strong> Mes groupes privés :</strong>
+                        <a href="{{ path('app_band_user', {'id': user.id}) }}" class="btn btn-primary"> Groupes
+                            privés ({{ user.ownedBands|length }}) </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -41,6 +47,6 @@
         </div>
     </div>
 
-    {#<a href="{{ path('app_user_edit', {'id': user.id}) }}">Modifier</a>
-    {{ include('user/_delete_form.html.twig') }}#}
+    {# <a href="{{ path('app_user_edit', {'id': user.id}) }}">Modifier</a>
+    {{ include('user/_delete_form.html.twig') }} #}
 {% endblock %}
