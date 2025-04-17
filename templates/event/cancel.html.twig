@@ -16,28 +16,28 @@
                         {{ form_start(cancelEventForm) }}
 
                         <div class="mb-3">
-                            {{ form_label(cancelEventForm.name) }}
-                            {{ form_widget(cancelEventForm.name, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                            <label class="form-label">Nom de l'événement</label>
+                            <input type="text" class="form-control" value="{{ event.name }}" readonly>
                         </div>
 
                         <div class="mb-3">
-                            {{ form_label(cancelEventForm.startDateTime) }}
-                            {{ form_widget(cancelEventForm.startDateTime, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                            <label class="form-label">Date de l'événement</label>
+                            <input type="text" class="form-control" value="{{ event.startDateTime|date('d/m/Y H:i') }}" readonly>
                         </div>
 
                         <div class="mb-3">
-                            {{ form_label(cancelEventForm.city) }}
-                            {{ form_widget(cancelEventForm.city, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                            <label class="form-label">Ville</label>
+                            <input type="text" class="form-control" value="{{ event.location.cityName }}" readonly>
                         </div>
 
                         <div class="mb-3">
-                            {{ form_label(cancelEventForm.location) }}
-                            {{ form_widget(cancelEventForm.location, {'attr': {'class': 'form-control', 'readonly': true}}) }}
+                            <label class="form-label">Lieu</label>
+                            <input type="text" class="form-control" value="{{ event.location.name }}" readonly>
                         </div>
 
                         <div class="mb-4">
-                            {{ form_label(cancelEventForm.motif, "✍️ Motif de l'annulation") }}
-                            {{ form_widget(cancelEventForm.motif, {'attr': {'class': 'form-control', 'placeholder': 'Décris les raisons de l’annulation…'}}) }}
+                            {{ form_label(cancelEventForm.info, "✍️ Motif de l'annulation") }}
+                            {{ form_widget(cancelEventForm.info, {'attr': {'class': 'form-control', 'placeholder': 'Décris les raisons de l’annulation…'}}) }}
                         </div>
 
                         <div class="text-center">

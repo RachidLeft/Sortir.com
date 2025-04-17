@@ -51,12 +51,12 @@ class Event
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\NotBlank(message: "La descritpion est obligatoire.")]
-    #[Assert\Length(
-        min: 10,
-        max: 100,
-        minMessage: 'La description doit contenir au moins {{ limit }} caractères',
-        maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères'
-    )]
+//    #[Assert\Length(
+//        min: 10,
+//        max: 250,
+//        minMessage: 'La description doit contenir au moins {{ limit }} caractères',
+//        maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères'
+//    )]
     private ?string $info = null;
 
     /**

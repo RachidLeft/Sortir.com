@@ -16,29 +16,29 @@ class CancelEventType extends AbstractType
         $event = $options['data'];
 
         $builder
-            ->add('name', TextType::class, [
-                'label'    => 'Nom de l\'événement',
-                'disabled' => true,
-                'data'     => $event->getName(),
-            ])
-            ->add('startDateTime', TextType::class, [
-                'label'    => 'Date de l\'événement',
-                'disabled' => true,
-                'data'     => $event->getStartDateTime() ? $event->getStartDateTime()->format('d-m-Y H:i:s') : '',
-            ])
-            ->add('city', TextType::class, [
-                'label'    => 'Ville',
-                'disabled' => true,
-                'mapped'   => false,
-                'data'     => $event->getLocation() ? $event->getLocation()->getCityName() : '',
-            ])
-            ->add('location', TextType::class, [
-                'label'    => 'Lieu',
-                'disabled' => true,
-                'mapped'   => false,
-                'data'     => $event->getLocation() ? $event->getLocation()->getName() : '',
-            ])
-            ->add('motif', TextareaType::class, [
+//            ->add('name', TextType::class, [
+//                'label'    => 'Nom de l\'événement',
+//                'disabled' => true,
+//                'data'     => $event->getName(),
+//            ])
+//            ->add('startDateTime', TextType::class, [
+//                'label'    => 'Date de l\'événement',
+//                'disabled' => true,
+//                'data'     => $event->getStartDateTime() ? $event->getStartDateTime()->format('d-m-Y H:i:s') : '',
+//            ])
+//            ->add('city', TextType::class, [
+//                'label'    => 'Ville',
+//                'disabled' => true,
+//                'mapped'   => false,
+//                'data'     => $event->getLocation() ? $event->getLocation()->getCityName() : '',
+//            ])
+//            ->add('location', TextType::class, [
+//                'label'    => 'Lieu',
+//                'disabled' => true,
+//                'mapped'   => false,
+//                'data'     => $event->getLocation() ? $event->getLocation()->getName() : '',
+//            ])
+            ->add('info', TextareaType::class, [
                 'label'  => 'Motif d\'annulation',
                 'mapped' => false,
                 'required' => true,

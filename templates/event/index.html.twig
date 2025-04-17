@@ -7,6 +7,7 @@
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for event in events %}
+                {% if event.status.type != 'Archivée' %}
                 <div class="col">
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
@@ -56,7 +57,7 @@
 
                             {% if (app.user.id is same as(event.organizer.id) or is_granted('ROLE_ADMIN')) and
                                 (event.status.type is same as ('Ouverte') or event.status.type is same as ('Clôturée')) %}
-                                <a href="{{ path('app_event_cancel_redirect', {'id': event.id}) }}"
+                                <a href="{{ path('app_event_cancel', {'id': event.id}) }}"
                                    class="btn btn-outline-danger btn-sm">Annuler la sortie</a>
                             {% endif %}
 
@@ -75,6 +76,7 @@
                         </div>
                     </div>
                 </div>
+                {% endif %}
             {% endfor %}
         </div>
     </div>

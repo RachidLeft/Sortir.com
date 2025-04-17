@@ -86,7 +86,7 @@ class BandController extends AbstractController
             $entityManager->flush();
 
             $this->addFlash('success', 'Votre groupe a été créé avec succès.');
-            // Redirection vers les groupes de l'utilisateur connecté
+
             return $this->redirectToRoute('app_band_user', ['id' => $user->getId()], Response::HTTP_SEE_OTHER);
         }
 
@@ -143,19 +143,31 @@ class BandController extends AbstractController
     #[Route('/{id}', name: 'app_band_delete', methods: ['POST'])]
     public function delete(Request $request, Band $band, EntityManagerInterface $entityManager): Response
     {
-        // Utiliser le voter au lieu de la vérification directe
+        /**
+         * Utiliser le voter au lieu de la vérification directe
+         * Récupère l'utilisateur actuellement connecté
+         * Vérifie si l'utilisateur a le rôle administrateur
+         */
         $this->denyAccessUnlessGranted('delete', $band);
+        $user = $this->getUser();
+        $isAdmin = in_array('ROLE_ADMIN', $user->getRoles());
 
+        /**
+         * Vérifie si le jeton CSRF est valide pour protéger contre les attaques CSRF
+         * Prépare l'entité Band pour être supprimée de la base de données
+         * Exécute les opérations préparées (suppression en base de données)
+         * Ajoute un message flash de succès
+         */
         if ($this->isCsrfTokenValid('delete'.$band->getId(), $request->request->get('_token'))) {
             $entityManager->remove($band);
             $entityManager->flush();
             $this->addFlash('success', 'Le groupe a été supprimé.');
         }
 
-        $user = $this->getUser();
-        $isAdmin = in_array('ROLE_ADMIN', $user->getRoles());
 
-        // Redirection différente selon le rôle et le contexte
+        /**
+         * Vérifie si l'utilisateur est un administrateur et si la requête provient d'une page liée aux groupes
+         */
         if ($isAdmin && $request->headers->get('referer') && str_contains($request->headers->get('referer'), '/band/')) {
             return $this->redirectToRoute('app_band_index');
         } else {
