@@ -1,14 +1,34 @@
 {% for label, messages in app.flashes %}
-    {%  for message in messages %}
-        <div class="alert alert-{{ label }}">
-            {{ message }}
+    {% for message in messages %}
+        <div class="alert alert-{{ label }} d-flex align-items-center justify-content-between fade show mb-3"
+             role="alert">
+            <div>
+                {% if label == 'success' %}
+                    ✅
+                {% elseif label == 'danger' %}
+                    ❌
+                {% elseif label == 'warning' %}
+                    ⚠️
+                {% elseif label == 'info' %}
+                    ℹ️
+                {% else %}
+                    🔔
+                {% endif %}
+                {{ message }}
+            </div>
         </div>
     {% endfor %}
-  <script>
-        setTimeout(() => {
-            document.querySelectorAll('.alert').forEach(alert => {
-                alert.remove();
-            });
-        }, 3000);
-  </script>
 {% endfor %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.classList.remove('show');
+                alert.classList.add('fade');
+                setTimeout(() => alert.remove(), 500);
+            }, 3000);
+        });
+    });
+</script>

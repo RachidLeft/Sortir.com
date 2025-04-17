@@ -16,6 +16,19 @@ class LocationRepository extends ServiceEntityRepository
         parent::__construct($registry, Location::class);
     }
 
+    // src/Repository/LocationRepository.php
+    public function findOneByNameAndAddress(string $name, string $street, string $cityname): ?Location
+    {
+        return $this->createQueryBuilder('l')
+            ->where('l.name = :name')
+            ->andWhere('l.street = :street')
+            ->andWhere('l.cityName = :cityName')
+            ->setParameter('name', $name)
+            ->setParameter('street', $street)
+            ->setParameter('cityName', $cityname)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
     //    /**
     //     * @return Location[] Returns an array of Location objects
     //     */

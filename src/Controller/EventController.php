@@ -7,6 +7,7 @@ use App\Entity\Status;
 use App\Form\EventType;
 use App\Form\CancelEventType;
 use App\Repository\EventRepository;
+use App\Repository\LocationRepository;
 use App\Repository\SiteRepository;
 use App\Repository\StatusRepository;
 use App\Repository\UserRepository;
@@ -35,13 +36,25 @@ final class EventController extends AbstractController
         ]);
     }
 
+    /**
+     *Permet de créer un nouvel événement.
+     * Un formulaire est généré pour collecter les données,
+     * des vérifications sont effectuées pour s'assurer que les champs obligatoires sont remplis,
+     * si un nouveau lieu est créé, il est vérifié s'il existe déjà dans la base de données.
+     * Une fois les données validées, l'événement est enregistré dans la base de données via EntityManagerInterface.
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @param StatusRepository $statusRepository
+     * @param LocationRepository $locationRepository
+     * @return Response
+     */
     #[Route('/new', name: 'app_event_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function new(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        StatusRepository $statusRepository
-    ): Response
+    public function new(Request                $request,
+                        EntityManagerInterface $entityManager,
+                        StatusRepository       $statusRepository,
+                        LocationRepository     $locationRepository): Response
     {
         $event = new Event();
         $form = $this->createForm(EventType::class, $event);
@@ -51,6 +64,20 @@ final class EventController extends AbstractController
             $newLocationData = $form->get('newLocation')->getData();
 
             if ($newLocationData) {
+                $existingLocation = $locationRepository->findOneByNameAndAddress(
+                    $newLocationData->getName(),
+                    $newLocationData->getStreet(),
+                    $newLocationData->getCityName()
+                );
+
+                if ($existingLocation) {
+                    $this->addFlash('danger', 'Un lieu avec le même nom et la même adresse existe déjà.');
+                    return $this->render('event/new.html.twig', [
+                        'event' => $event,
+                        'form' => $form,
+                    ]);
+                }
+
                 $entityManager->persist($newLocationData);
                 $entityManager->flush();
                 $event->setLocation($newLocationData);
@@ -66,6 +93,7 @@ final class EventController extends AbstractController
                 $this->addFlash('success', 'La sortie a été publiée avec succès.');
             } else {
                 $status = $statusRepository->findOneBy(['type' => 'En création']);
+                $this->addFlash('success', 'La sortie a été enregistrée avec succès.');
             }
 
             $event->setStatus($status);
@@ -84,6 +112,13 @@ final class EventController extends AbstractController
         ]);
     }
 
+    /**
+     * Affiche les détails d'un événement spécifique.
+     * L'événement est récupéré via son ID et affiché dans une vue.
+     *
+     * @param Event $event
+     * @return Response
+     */
     #[Route('/{id}', name: 'app_event_show', methods: ['GET'])]
     public function show(Event $event): Response
     {
@@ -93,6 +128,17 @@ final class EventController extends AbstractController
         ]);
     }
 
+    /**
+     * Permet de modifier un événement existant.
+     * Un formulaire est utilisé pour mettre à jour les données de l'événement,
+     * et les informations sont mises à jour dans la base de données via EntityManagerInterface.
+     *
+     * @param Request $request
+     * @param Event $event
+     * @param EntityManagerInterface $entityManager
+     * @param StatusRepository $statusRepository
+     * @return Response
+     */
     #[Route('/{id}/edit', name: 'app_event_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Event $event, EntityManagerInterface $entityManager, StatusRepository $statusRepository): Response
     {
@@ -128,10 +174,19 @@ final class EventController extends AbstractController
         ]);
     }
 
+    /**
+     * Supprime un événement.
+     * Vérifie la validité d'un token CSRF avant de supprimer l'événement de la base de données.
+     *
+     * @param Request $request
+     * @param Event $event
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
     #[Route('/{id}', name: 'app_event_delete', methods: ['POST'])]
     public function delete(Request $request, Event $event, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$event->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $event->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($event);
             $entityManager->flush();
             $this->addFlash('success', 'La sortie a été supprimée avec succès.');
@@ -140,14 +195,22 @@ final class EventController extends AbstractController
         return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
     }
 
-
+    /**
+     * Inscrit un utilisateur à un événement.
+     * Vérifie que l'utilisateur n'est pas déjà inscrit avant de l'ajouter à la liste des participants.
+     *
+     * @param Request $request
+     * @param Event $event
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
     #[Route('/{id}/register', name: 'app_event_register', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
     public function inscription(
-        Request $request,
-        Event $event, 
+        Request                $request,
+        Event                  $event,
         EntityManagerInterface $entityManager,
-        MailerInterface $mailer
+        MailerInterface        $mailer
     ): Response
     {
         if ($this->isCsrfTokenValid('register' . $event->getId(), $request->getPayload()->getString('_token'))) {
@@ -159,22 +222,21 @@ final class EventController extends AbstractController
                 $this->addFlash('danger', 'Vous êtes déjà inscrit à cette sortie.');
                 return $this->redirectToRoute('app_main_index');
             } else {
-                //ajout de l'utilisateur à la bdd
                 $event->addUser($user);
                 $entityManager->flush();
                 $this->addFlash('success', 'Vous êtes maintenant inscrit à la sortie.');
 
                 //envoi de l'email à l'utilisateur inscrit
                 $email = (new Email())
-                ->from('noreply@example.com')
-                ->to($user->getEmail())
-                ->subject('Inscription à l\'évènement ' . $event->getName())
-                ->html(
-                    '<p>Bonjour,</p>
+                    ->from('noreply@example.com')
+                    ->to($user->getEmail())
+                    ->subject('Inscription à l\'évènement ' . $event->getName())
+                    ->html(
+                        '<p>Bonjour,</p>
                     <p>Vous êtes inscrit à l\'évènement <strong>' . $event->getName() . '</strong>.</p>
                     <p>Cordialement,</p>
                     <p>L\'équipe.</p>'
-                );
+                    );
                 $mailer->send($email);
             }
 
@@ -184,13 +246,21 @@ final class EventController extends AbstractController
 
     }
 
+    /**
+     * Désinscrit un utilisateur d'un événement.
+     * Vérifie que l'utilisateur est bien inscrit avant de le retirer de la liste des participants.
+     * @param Request $request
+     * @param Event $event
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
     #[Route('/{id}/unregister', name: 'app_event_unregister', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
     public function unregister(
-        Request $request,
-        Event $event,
+        Request                $request,
+        Event                  $event,
         EntityManagerInterface $entityManager,
-        MailerInterface $mailer): Response
+        MailerInterface        $mailer): Response
     {
 
         if ($this->isCsrfTokenValid('unregister' . $event->getId(), $request->getPayload()->getString('_token'))) {
@@ -200,22 +270,21 @@ final class EventController extends AbstractController
             if (!$event->getUsers()->contains($user)) {
                 $this->addFlash('danger', 'Vous n\'êtes pas inscrit à cette sortie.');
             } else {
-                //suppression de l'utilisateur de la bdd
                 $event->removeUser($user);
                 $entityManager->flush();
                 $this->addFlash('success', 'Votre désinscription a été prise en compte.');
 
                 //envoi de l'email à l'utilisateur désinscrit
                 $email = (new Email())
-                ->from('noreply@example.com')
-                ->to($user->getEmail())
-                ->subject('Désistement à l\'évènement ' . $event->getName())
-                ->html(
-                    '<p>Bonjour,</p>
+                    ->from('noreply@example.com')
+                    ->to($user->getEmail())
+                    ->subject('Désistement à l\'évènement ' . $event->getName())
+                    ->html(
+                        '<p>Bonjour,</p>
                     <p>Vous êtes désinscrit de l\'évènement <strong>' . $event->getName() . '</strong>.</p>
                     <p>Cordialement,</p>
                     <p>L\'équipe.</p>'
-                );
+                    );
                 $mailer->send($email);
             }
         }
@@ -223,6 +292,15 @@ final class EventController extends AbstractController
         return $this->redirectToRoute('app_main_index');
     }
 
+    /**
+     * Publie un événement.
+     * Vérifie la validité d'un token CSRF avant de changer le statut de l'événement.
+     *
+     * @param Event $event
+     * @param Request $request
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
     #[Route('/event/publish/{id}', name: 'app_event_publish', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
     public function publish(Event $event, Request $request, EntityManagerInterface $entityManager): Response
@@ -239,6 +317,14 @@ final class EventController extends AbstractController
         return $this->redirectToRoute('app_main_index');
     }
 
+    /**
+     *
+     * Affiche un formulaire pour annuler un événement.
+     * Ce formulaire est pré-rempli avec les données de l'événement
+     * @param Event $event
+     * @param EventRepository $eventRepository
+     * @return Response
+     */
     #[Route('/{id}/cancel', name: 'app_event_cancel_redirect', methods: ['GET'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_USER')]
     public function cancelRedirect(
@@ -263,21 +349,22 @@ final class EventController extends AbstractController
         ]);
     }
 
-#[Route('/{id}/cancel', name: 'app_event_cancel_submit', methods: ['POST'], requirements: ['id' => '\d+'])]
-#[IsGranted('ROLE_USER')]
-public function cancelSubmit(
-    Request $request,
-    Event $event, // Cet event provient de l'URL (ex : id 7)
-    EntityManagerInterface $entityManager,
-    StatusRepository $statusRepository,
-    EventRepository $eventRepository,
-    MailerInterface $mailer
-): Response {
+    #[Route('/{id}/cancel', name: 'app_event_cancel_submit', methods: ['POST'], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_USER')]
+    public function cancelSubmit(
+        Request                $request,
+        Event                  $event, // Cet event provient de l'URL (ex : id 7)
+        EntityManagerInterface $entityManager,
+        StatusRepository       $statusRepository,
+        EventRepository        $eventRepository,
+        MailerInterface        $mailer
+    ): Response
+    {
         $events = $eventRepository->findAll();
 
         $cancelForms = [];
         foreach ($events as $evt) { // utilisation d'une variable différente pour la boucle
-            if ($this->getUser()->getId() === $evt->getOrganizer()->getId() && $evt->getStatus()->getId() === 2) {
+            if ($this->getUser()->getId() === $evt->getOrganizer()->getId() && $evt->getStatus()->getType() == 'Ouverte') {
                 $cancelForms[$evt->getId()] = $this->createForm(CancelEventType::class, $evt, [
                     'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $evt->getId()]),
                     'method' => 'POST',
@@ -292,7 +379,7 @@ public function cancelSubmit(
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid() && $form->get('cancel')->isClicked()) {
-            $cancelStatus = $statusRepository->find(6);
+            $cancelStatus = $statusRepository->findOneBy(['type' => 'Annulée']);
             $event->setStatus($cancelStatus);
             $motif = $form->get('motif')->getData();
             $event->setInfo($event->getInfo() . " annulé : " . $motif);

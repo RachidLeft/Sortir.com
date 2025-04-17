@@ -21,8 +21,8 @@ class Location
     #[Assert\Length(
         min: 3,
         max: 50,
-        minMessage: 'Le nom de l\'événement doit contenir au moins {{ limit }} caractères',
-        maxMessage: 'Le nom de l\'événement ne peut pas dépasser {{ limit }} caractères'
+        minMessage: 'Le nom du lieu doit contenir au moins {{ limit }} caractères',
+        maxMessage: 'Le nom du lieu ne peut pas dépasser {{ limit }} caractères'
     )]
     private ?string $name = null;
 
