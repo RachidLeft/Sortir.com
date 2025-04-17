@@ -20,7 +20,7 @@ class Event
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Ce champ est obligatoire') ]
+    #[Assert\NotBlank(message: 'Ce champ est obligatoire')]
     #[Assert\Length(
         min: 2,
         max: 50,
@@ -41,7 +41,7 @@ class Event
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotBlank(message: "La date de fin est obligatoire.")]
-    #[Assert\LessThan(propertyPath:'startDateTime', message: 'La date limite d\'inscription doit être antérieure à la date de début de l\'événement')]
+    #[Assert\LessThan(propertyPath: 'startDateTime', message: 'La date limite d\'inscription doit être antérieure à la date de début de l\'événement')]
     private ?\DateTimeInterface $registrationDeadline = null;
 
     #[ORM\Column]
@@ -51,12 +51,12 @@ class Event
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\NotBlank(message: "La descritpion est obligatoire.")]
-    #[Assert\Length(
+    /*#[Assert\Length(
         min: 10,
         max: 100,
         minMessage: 'La description doit contenir au moins {{ limit }} caractères',
         maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères'
-    )]
+    )]*/
     private ?string $info = null;
 
     /**

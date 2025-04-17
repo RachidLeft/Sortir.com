@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
@@ -17,41 +18,40 @@ class CancelEventType extends AbstractType
 
         $builder
             ->add('name', TextType::class, [
-                'label'    => 'Nom de l\'événement',
+                'label' => 'Nom de l\'événement',
                 'disabled' => true,
-                'data'     => $event->getName(),
+                'data' => $event->getName(),
             ])
             ->add('startDateTime', TextType::class, [
-                'label'    => 'Date de l\'événement',
+                'label' => 'Date de l\'événement',
                 'disabled' => true,
-                'data'     => $event->getStartDateTime() ? $event->getStartDateTime()->format('d-m-Y H:i:s') : '',
+                'data' => $event->getStartDateTime() ? $event->getStartDateTime()->format('d-m-Y H:i:s') : '',
             ])
             ->add('city', TextType::class, [
-                'label'    => 'Ville',
+                'label' => 'Ville',
                 'disabled' => true,
-                'mapped'   => false,
-                'data'     => $event->getLocation() ? $event->getLocation()->getCityName() : '',
+                'mapped' => false,
+                'data' => $event->getLocation() ? $event->getLocation()->getCityName() : '',
             ])
             ->add('location', TextType::class, [
-                'label'    => 'Lieu',
+                'label' => 'Lieu',
                 'disabled' => true,
-                'mapped'   => false,
-                'data'     => $event->getLocation() ? $event->getLocation()->getName() : '',
+                'mapped' => false,
+                'data' => $event->getLocation() ? $event->getLocation()->getName() : '',
             ])
-            ->add('motif', TextareaType::class, [
-                'label'  => 'Motif d\'annulation',
+            ->add('info', TextareaType::class, [
+                'label' => 'Motif d\'annulation',
                 'mapped' => false,
                 'required' => true,
             ])
             ->add('cancel', SubmitType::class, [
                 'label' => 'Annuler la sortie',
-                'attr'  => [
+                'attr' => [
                     'class' => 'btn btn-outline-danger btn-sm',
                 ]
-            ])
-        ;
+            ]);
     }
-    
+
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([

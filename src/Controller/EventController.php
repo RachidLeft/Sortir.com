@@ -325,81 +325,83 @@ final class EventController extends AbstractController
      * @param EventRepository $eventRepository
      * @return Response
      */
-    #[Route('/{id}/cancel', name: 'app_event_cancel_redirect', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[Route('/{id}/cancel', name: 'app_event_cancel', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_USER')]
-    public function cancelRedirect(
+    public function cancelEvent(
         Request                $request,
         Event                  $event,
         EntityManagerInterface $entityManager,
         StatusRepository       $statusRepository,
-        EventRepository        $eventRepository
+        MailerInterface        $mailer
     ): Response
     {
-        $events = $eventRepository->findAll();
+        // Vérification que l'utilisateur actuel est l'organisateur
+        if ($event->getOrganizer() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN')) {
+            $this->addFlash('danger', 'Vous n\'êtes pas autorisé à annuler cet événement.');
+            return $this->redirectToRoute('app_main_index');
+        }
 
-        // Créer le formulaire CancelEventType
-        $form = $this->createForm(CancelEventType::class, $event, [
-            'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $event->getId()]),
-            'method' => 'POST',
-        ]);
+        // Vérification du statut de l'événement
+        $allowedStatuses = ['Ouverte', 'Clôturée'];
+        if (!in_array($event->getStatus()->getType(), $allowedStatuses)) {
+            $this->addFlash('danger', 'Impossible d\'annuler un événement avec le statut ' . $event->getStatus()->getType());
+            return $this->redirectToRoute('app_main_index');
+        }
+
+        // Création du formulaire
+        $form = $this->createForm(CancelEventType::class, $event);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Mettre à jour le statut
+            $cancelStatus = $statusRepository->findOneBy(['type' => 'Annulée']);
+            $event->setStatus($cancelStatus);
+
+            // Récupérer le motif d'annulation
+            $motif = $form->get('info')->getData();
+            $event->setInfo($motif);
+
+            // Persister les modifications
+            $entityManager->flush();
+
+            // Envoyer un email à l'organisateur
+            $organizer = $event->getOrganizer();
+            $email = (new Email())
+                ->from('noreply@example.com')
+                ->to($organizer->getEmail())
+                ->subject('Confirmation d\'annulation de l\'événement ' . $event->getName())
+                ->html(
+                    '<p>Bonjour ' . $organizer->getUsername() . ',</p>
+                    <p>Vous avez annulé l\'événement <strong>' . $event->getName() . '</strong> pour le motif suivant : ' . $event->getInfo() . '</p>
+                    <p>Cordialement,</p>
+                    <p>L\'équipe.</p>'
+                );
+            $mailer->send($email);
+
+            // Envoyer un email à tous les participants
+            foreach ($event->getUsers() as $user) {
+                if ($user !== $organizer) { // Pour éviter d'envoyer deux fois à l'organisateur
+                    $email = (new Email())
+                        ->from('noreply@example.com')
+                        ->to($user->getEmail())
+                        ->subject('Annulation de l\'événement ' . $event->getName())
+                        ->html(
+                            '<p>Bonjour ' . $user->getUsername() . ',</p>
+                            <p>L\'événement <strong>' . $event->getName() . '</strong> a été annulé pour le motif suivant : ' . $event->getInfo() . '</p>
+                            <p>Cordialement,</p>
+                            <p>L\'équipe.</p>'
+                        );
+                    $mailer->send($email);
+                }
+            }
+
+            $this->addFlash('success', 'La sortie a été annulée avec succès.');
+            return $this->redirectToRoute('app_main_index');
+        }
 
         return $this->render('event/cancel.html.twig', [
             'cancelEventForm' => $form->createView(),
             'event' => $event,
         ]);
-    }
-
-    #[Route('/{id}/cancel', name: 'app_event_cancel_submit', methods: ['POST'], requirements: ['id' => '\d+'])]
-    #[IsGranted('ROLE_USER')]
-    public function cancelSubmit(
-        Request                $request,
-        Event                  $event, // Cet event provient de l'URL (ex : id 7)
-        EntityManagerInterface $entityManager,
-        StatusRepository       $statusRepository,
-        EventRepository        $eventRepository,
-        MailerInterface        $mailer
-    ): Response
-    {
-        $events = $eventRepository->findAll();
-
-        $cancelForms = [];
-        foreach ($events as $evt) { // utilisation d'une variable différente pour la boucle
-            if ($this->getUser()->getId() === $evt->getOrganizer()->getId() && $evt->getStatus()->getType() == 'Ouverte') {
-                $cancelForms[$evt->getId()] = $this->createForm(CancelEventType::class, $evt, [
-                    'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $evt->getId()]),
-                    'method' => 'POST',
-                ])->createView();
-            }
-        }
-
-        $form = $this->createForm(CancelEventType::class, $event, [
-            'action' => $this->generateUrl('app_event_cancel_submit', ['id' => $event->getId()]),
-            'method' => 'POST',
-        ]);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid() && $form->get('cancel')->isClicked()) {
-            $cancelStatus = $statusRepository->findOneBy(['type' => 'Annulée']);
-            $event->setStatus($cancelStatus);
-            $motif = $form->get('motif')->getData();
-            $event->setInfo($event->getInfo() . " annulé : " . $motif);
-            $entityManager->flush();
-        }
-
-        foreach ($event->getUsers() as $user) {
-            $email = (new Email())
-                ->from('noreply@example.com')
-                ->to($user->getEmail())
-                ->subject('Annulation de l\'événement ' . $event->getName())
-                ->html(
-                    '<p>Bonjour ' . $user->getUsername() . ',</p>
-                    <p>L\'événement <strong>' . $event->getName() . '</strong> a été annulé pour le motif suivant : ' . $motif . '</p>
-                    <p>Cordialement,</p>
-                    <p>L\'équipe.</p>'
-                );
-            $mailer->send($email);
-        }
-
-        return $this->redirectToRoute('app_main_index', [], Response::HTTP_SEE_OTHER);
     }
 }

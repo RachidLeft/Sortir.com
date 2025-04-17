@@ -111,7 +111,7 @@ final class MainController extends AbstractController
          */
         foreach ($paginator as $event) {
             $cancelEventForm[$event->getId()] = $this->createForm(CancelEventType::class, $event, [
-                'action' => $this->generateUrl('app_event_cancel_redirect', ['id' => $event->getId()]),
+                'action' => $this->generateUrl('app_event_cancel', ['id' => $event->getId()]),
                 'method' => 'POST',
             ])->createView();
         }
