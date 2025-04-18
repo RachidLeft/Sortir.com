@@ -45,11 +45,10 @@ class CancelEventType extends AbstractType
             ])
             ->add('cancel', SubmitType::class, [
                 'label' => 'Annuler la sortie',
-                'attr'  => [
+                'attr' => [
                     'class' => 'btn btn-outline-danger btn-sm',
                 ]
-            ])
-        ;
+            ]);
     }
     
     public function configureOptions(OptionsResolver $resolver): void

@@ -325,14 +325,14 @@ final class EventController extends AbstractController
      * @param EventRepository $eventRepository
      * @return Response
      */
-    #[Route('/{id}/cancel', name: 'app_event_cancel_redirect', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[Route('/{id}/cancel', name: 'app_event_cancel', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_USER')]
     public function cancelEvent(
-        Request $request,
-        Event $event,
+        Request                $request,
+        Event                  $event,
         EntityManagerInterface $entityManager,
-        StatusRepository $statusRepository,
-        MailerInterface $mailer
+        StatusRepository       $statusRepository,
+        MailerInterface        $mailer
     ): Response
     {
         // Vérification que l'utilisateur actuel est l'organisateur
